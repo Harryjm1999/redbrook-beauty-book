@@ -60,13 +60,23 @@ export async function fetchMyBookings(userId: string) {
 export async function fetchAllBookings() {
   const { data, error } = await supabase
     .from("bookings")
-    .select("*, treatments(name), profiles(full_name, email, phone)")
+    .select("*, treatments(name)")
     .order("starts_at", { ascending: true });
   if (error) throw error;
-  return (data ?? []) as (Booking & {
-    treatments: { name: string } | null;
-    profiles: { full_name: string; email: string | null; phone: string | null } | null;
-  })[];
+  const bookings = (data ?? []) as unknown as (Booking & { treatments: { name: string } | null })[];
+
+  const ids = [...new Set(bookings.map((b) => b.user_id))];
+  const patients = new Map<string, Profile>();
+  if (ids.length) {
+    const { data: profiles, error: profileError } = await supabase
+      .from("profiles")
+      .select("id, full_name, email, phone")
+      .in("id", ids);
+    if (profileError) throw profileError;
+    for (const p of (profiles ?? []) as Profile[]) patients.set(p.id, p);
+  }
+
+  return bookings.map((b) => ({ ...b, patient: patients.get(b.user_id) ?? null }));
 }
 
 export async function fetchMyProfile(userId: string) {
