@@ -11,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { fetchAllBookings, fetchIsStaff } from "@/lib/queries";
+import { STAFF_BLOCK_NOTE, fetchAllBookings, fetchIsStaff } from "@/lib/queries";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -76,7 +76,7 @@ function AdminPage() {
     );
   }
 
-  const all = bookings ?? [];
+  const all = (bookings ?? []).filter((b) => b.staff_notes !== STAFF_BLOCK_NOTE);
   const pending = all.filter((b) => b.status === "pending");
   const upcoming = all.filter((b) => b.status === "confirmed" && new Date(b.starts_at) >= new Date());
 

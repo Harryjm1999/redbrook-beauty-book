@@ -96,7 +96,7 @@ export function DiaryCalendar({
   const upcoming = useMemo(
     () =>
       active
-        .filter((b) => new Date(b.starts_at) >= new Date())
+        .filter((b) => b.staff_notes !== STAFF_BLOCK_NOTE && new Date(b.starts_at) >= new Date())
         .sort((a, b) => a.starts_at.localeCompare(b.starts_at))
         .slice(0, 10),
     [active],
