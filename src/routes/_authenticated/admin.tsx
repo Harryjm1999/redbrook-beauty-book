@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 import { BlockedDates } from "@/components/BlockedDates";
 import { BookingRequests } from "@/components/BookingRequests";
+import { DiaryCalendar } from "@/components/DiaryCalendar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -154,8 +155,11 @@ function AdminPage() {
         Review requests, confirm appointments and see patient contact details.
       </p>
 
-      <Tabs defaultValue="pending" className="mt-10">
-        <TabsList>
+      <Tabs defaultValue="calendar" className="mt-10">
+        <TabsList className="flex-wrap">
+          <TabsTrigger value="calendar" className="label-caps">
+            Calendar
+          </TabsTrigger>
           <TabsTrigger value="pending" className="label-caps">
             Requests ({pending.length})
           </TabsTrigger>
@@ -169,6 +173,9 @@ function AdminPage() {
             Blocked dates
           </TabsTrigger>
         </TabsList>
+        <TabsContent value="calendar">
+          <DiaryCalendar bookings={all} isLoading={isLoading} />
+        </TabsContent>
         <TabsContent value="pending">
           <BookingRequests requests={pending} isLoading={isLoading} />
         </TabsContent>
