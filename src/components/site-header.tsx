@@ -61,8 +61,19 @@ export function SiteHeader() {
           My Appointments
         </Link>
       ) : null}
+      {isStaff ? (
+        <Link
+          to="/admin"
+          onClick={() => setOpen(false)}
+          className="label-caps text-muted-foreground transition-colors hover:text-foreground"
+          activeProps={{ className: "label-caps text-foreground" }}
+        >
+          Clinic Diary
+        </Link>
+      ) : null}
     </>
   );
+
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-cream/90 backdrop-blur">
