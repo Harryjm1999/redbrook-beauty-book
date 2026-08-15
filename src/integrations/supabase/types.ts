@@ -183,7 +183,18 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      blocked_days: {
+        Row: {
+          day: string | null
+        }
+        Insert: {
+          day?: string | null
+        }
+        Update: {
+          day?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       busy_ranges: {
