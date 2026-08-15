@@ -23,6 +23,13 @@ export function SiteHeader() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
 
+  const { data: isStaff } = useQuery({
+    queryKey: ["is-staff", user?.id ?? ""],
+    queryFn: () => fetchIsStaff(user!.id),
+    enabled: Boolean(user?.id),
+  });
+
+
   async function signOut() {
     await queryClient.cancelQueries();
     queryClient.clear();
