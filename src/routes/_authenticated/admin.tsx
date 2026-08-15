@@ -169,7 +169,9 @@ function AdminPage() {
             Blocked dates
           </TabsTrigger>
         </TabsList>
-        <TabsContent value="pending">{renderList(pending)}</TabsContent>
+        <TabsContent value="pending">
+          <BookingRequests requests={pending} isLoading={isLoading} />
+        </TabsContent>
         <TabsContent value="upcoming">{renderList(upcoming)}</TabsContent>
         <TabsContent value="past">{renderList(past)}</TabsContent>
         <TabsContent value="blocked">
