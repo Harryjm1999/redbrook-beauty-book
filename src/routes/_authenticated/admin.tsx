@@ -3,7 +3,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { toast } from "sonner";
 
-import { BlockedDates } from "@/components/BlockedDates";
 import { BookingRequests } from "@/components/BookingRequests";
 import { DiaryCalendar } from "@/components/DiaryCalendar";
 import { Badge } from "@/components/ui/badge";
@@ -80,9 +79,6 @@ function AdminPage() {
   const all = bookings ?? [];
   const pending = all.filter((b) => b.status === "pending");
   const upcoming = all.filter((b) => b.status === "confirmed" && new Date(b.starts_at) >= new Date());
-  const past = all.filter(
-    (b) => b.status !== "pending" && !(b.status === "confirmed" && new Date(b.starts_at) >= new Date()),
-  );
 
   function renderList(list: typeof all) {
     if (isLoading) return <Skeleton className="mt-6 h-40 w-full" />;
@@ -166,24 +162,14 @@ function AdminPage() {
           <TabsTrigger value="upcoming" className="label-caps">
             Upcoming ({upcoming.length})
           </TabsTrigger>
-          <TabsTrigger value="past" className="label-caps">
-            Everything else
-          </TabsTrigger>
-          <TabsTrigger value="blocked" className="label-caps">
-            Blocked dates
-          </TabsTrigger>
         </TabsList>
         <TabsContent value="calendar">
-          <DiaryCalendar bookings={all} isLoading={isLoading} />
+          <DiaryCalendar bookings={all} isLoading={isLoading} userId={userId} />
         </TabsContent>
         <TabsContent value="pending">
           <BookingRequests requests={pending} isLoading={isLoading} />
         </TabsContent>
         <TabsContent value="upcoming">{renderList(upcoming)}</TabsContent>
-        <TabsContent value="past">{renderList(past)}</TabsContent>
-        <TabsContent value="blocked">
-          <BlockedDates userId={userId} />
-        </TabsContent>
       </Tabs>
     </section>
   );
