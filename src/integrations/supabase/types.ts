@@ -14,13 +14,41 @@ export type Database = {
   }
   public: {
     Tables: {
+      blocked_date_reasons: {
+        Row: {
+          blocked_date_id: string
+          created_at: string
+          reason: string
+          updated_at: string
+        }
+        Insert: {
+          blocked_date_id: string
+          created_at?: string
+          reason: string
+          updated_at?: string
+        }
+        Update: {
+          blocked_date_id?: string
+          created_at?: string
+          reason?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blocked_date_reasons_blocked_date_id_fkey"
+            columns: ["blocked_date_id"]
+            isOneToOne: true
+            referencedRelation: "blocked_dates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       blocked_dates: {
         Row: {
           created_at: string
           created_by: string | null
           day: string
           id: string
-          reason: string | null
           updated_at: string
         }
         Insert: {
@@ -28,7 +56,6 @@ export type Database = {
           created_by?: string | null
           day: string
           id?: string
-          reason?: string | null
           updated_at?: string
         }
         Update: {
@@ -36,7 +63,6 @@ export type Database = {
           created_by?: string | null
           day?: string
           id?: string
-          reason?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -183,18 +209,7 @@ export type Database = {
       }
     }
     Views: {
-      blocked_days: {
-        Row: {
-          day: string | null
-        }
-        Insert: {
-          day?: string | null
-        }
-        Update: {
-          day?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       busy_ranges: {
