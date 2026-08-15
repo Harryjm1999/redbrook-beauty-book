@@ -1,12 +1,14 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Menu } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/hooks/useAuth";
+import { fetchIsStaff } from "@/lib/queries";
 import { supabase } from "@/integrations/supabase/client";
+
 
 const NAV = [
   { to: "/", label: "Home" },
@@ -20,6 +22,13 @@ export function SiteHeader() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
+
+  const { data: isStaff } = useQuery({
+    queryKey: ["is-staff", user?.id ?? ""],
+    queryFn: () => fetchIsStaff(user!.id),
+    enabled: Boolean(user?.id),
+  });
+
 
   async function signOut() {
     await queryClient.cancelQueries();
@@ -52,8 +61,19 @@ export function SiteHeader() {
           My Appointments
         </Link>
       ) : null}
+      {isStaff ? (
+        <Link
+          to="/admin"
+          onClick={() => setOpen(false)}
+          className="label-caps text-muted-foreground transition-colors hover:text-foreground"
+          activeProps={{ className: "label-caps text-foreground" }}
+        >
+          Clinic Diary
+        </Link>
+      ) : null}
     </>
   );
+
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-cream/90 backdrop-blur">
