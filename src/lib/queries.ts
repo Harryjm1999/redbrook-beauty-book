@@ -90,3 +90,34 @@ export async function fetchIsStaff(userId: string) {
   if (error) throw error;
   return (data ?? []).some((r: { role: string }) => r.role === "admin" || r.role === "staff");
 }
+
+export type BlockedDate = {
+  id: string;
+  day: string;
+  reason: string | null;
+  created_at: string;
+};
+
+export async function fetchBlockedDates(): Promise<BlockedDate[]> {
+  const { data, error } = await supabase
+    .from("blocked_dates")
+    .select("id, day, reason, created_at")
+    .order("day", { ascending: true });
+  if (error) throw error;
+  return (data ?? []) as BlockedDate[];
+}
+
+export async function addBlockedDates(days: string[], reason: string | null, userId: string) {
+  const { error } = await supabase
+    .from("blocked_dates")
+    .upsert(
+      days.map((day) => ({ day, reason, created_by: userId })),
+      { onConflict: "day" },
+    );
+  if (error) throw error;
+}
+
+export async function removeBlockedDate(id: string) {
+  const { error } = await supabase.from("blocked_dates").delete().eq("id", id);
+  if (error) throw error;
+}
