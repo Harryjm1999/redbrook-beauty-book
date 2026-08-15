@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { toast } from "sonner";
 
 import { BlockedDates } from "@/components/BlockedDates";
+import { BookingRequests } from "@/components/BookingRequests";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -168,7 +169,9 @@ function AdminPage() {
             Blocked dates
           </TabsTrigger>
         </TabsList>
-        <TabsContent value="pending">{renderList(pending)}</TabsContent>
+        <TabsContent value="pending">
+          <BookingRequests requests={pending} isLoading={isLoading} />
+        </TabsContent>
         <TabsContent value="upcoming">{renderList(upcoming)}</TabsContent>
         <TabsContent value="past">{renderList(past)}</TabsContent>
         <TabsContent value="blocked">
