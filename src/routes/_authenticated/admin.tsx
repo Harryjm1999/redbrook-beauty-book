@@ -172,6 +172,9 @@ function AdminPage() {
             Blocked dates
           </TabsTrigger>
         </TabsList>
+        <TabsContent value="calendar">
+          <DiaryCalendar bookings={all} isLoading={isLoading} />
+        </TabsContent>
         <TabsContent value="pending">
           <BookingRequests requests={pending} isLoading={isLoading} />
         </TabsContent>
