@@ -154,8 +154,11 @@ function AdminPage() {
         Review requests, confirm appointments and see patient contact details.
       </p>
 
-      <Tabs defaultValue="pending" className="mt-10">
-        <TabsList>
+      <Tabs defaultValue="calendar" className="mt-10">
+        <TabsList className="flex-wrap">
+          <TabsTrigger value="calendar" className="label-caps">
+            Calendar
+          </TabsTrigger>
           <TabsTrigger value="pending" className="label-caps">
             Requests ({pending.length})
           </TabsTrigger>
