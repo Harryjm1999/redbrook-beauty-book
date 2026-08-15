@@ -12,7 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { buildSlots, formatPrice, OPENING_HOURS, toDateKey } from "@/lib/clinic";
-import { fetchBusyRanges, fetchTreatments } from "@/lib/queries";
+import { fetchBlockedDates, fetchBusyRanges, fetchTreatments } from "@/lib/queries";
 
 export const Route = createFileRoute("/_authenticated/book")({
   head: () => ({
@@ -54,6 +54,13 @@ function BookPage() {
     }
     return list;
   }, []);
+
+  const { data: blocked } = useQuery({ queryKey: ["blocked-dates"], queryFn: fetchBlockedDates });
+  const blockedMap = useMemo(() => {
+    const map = new Map<string, string | null>();
+    for (const b of blocked ?? []) map.set(b.day, b.reason);
+    return map;
+  }, [blocked]);
 
   const dayKey = day ? toDateKey(day) : null;
   const { data: busy, isFetching: loadingSlots } = useQuery({
@@ -135,18 +142,24 @@ function BookPage() {
           <div className="mt-3 flex gap-3 overflow-x-auto pb-3">
             {openDays.map((d) => {
               const selected = day ? isSameDay(d, day) : false;
+              const key = toDateKey(d);
+              const isBlocked = blockedMap.has(key);
               return (
                 <button
                   key={d.toISOString()}
                   type="button"
+                  disabled={isBlocked}
+                  title={isBlocked ? blockedMap.get(key) ?? "Fully booked" : undefined}
                   onClick={() => {
                     setDay(d);
                     setSlotIso("");
                   }}
                   className={`min-w-24 shrink-0 border px-4 py-3 text-center transition-colors ${
-                    selected
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-border bg-card hover:bg-secondary"
+                    isBlocked
+                      ? "cursor-not-allowed border-dashed border-border bg-muted text-muted-foreground/50 line-through"
+                      : selected
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border bg-card hover:bg-secondary"
                   }`}
                 >
                   <span className="label-caps block">{format(d, "EEE")}</span>
