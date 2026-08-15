@@ -164,10 +164,16 @@ function AdminPage() {
           <TabsTrigger value="past" className="label-caps">
             Everything else
           </TabsTrigger>
+          <TabsTrigger value="blocked" className="label-caps">
+            Blocked dates
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="pending">{renderList(pending)}</TabsContent>
         <TabsContent value="upcoming">{renderList(upcoming)}</TabsContent>
         <TabsContent value="past">{renderList(past)}</TabsContent>
+        <TabsContent value="blocked">
+          <BlockedDates userId={userId} />
+        </TabsContent>
       </Tabs>
     </section>
   );
