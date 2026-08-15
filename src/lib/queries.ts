@@ -101,21 +101,41 @@ export type BlockedDate = {
 export async function fetchBlockedDates(): Promise<BlockedDate[]> {
   const { data, error } = await supabase
     .from("blocked_dates")
-    .select("id, day, reason, created_at")
+    .select("id, day, created_at, blocked_date_reasons(reason)")
     .order("day", { ascending: true });
   if (error) throw error;
-  return (data ?? []) as BlockedDate[];
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    day: row.day,
+    created_at: row.created_at,
+    reason:
+      (Array.isArray(row.blocked_date_reasons)
+        ? row.blocked_date_reasons[0]?.reason
+        : (row.blocked_date_reasons as { reason: string } | null)?.reason) ?? null,
+  }));
 }
 
 export async function addBlockedDates(days: string[], reason: string | null, userId: string) {
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("blocked_dates")
     .upsert(
-      days.map((day) => ({ day, reason, created_by: userId })),
+      days.map((day) => ({ day, created_by: userId })),
       { onConflict: "day" },
-    );
+    )
+    .select("id");
   if (error) throw error;
+
+  const trimmed = reason?.trim();
+  if (trimmed && data?.length) {
+    const { error: reasonError } = await supabase
+      .from("blocked_date_reasons")
+      .upsert(data.map((row) => ({ blocked_date_id: row.id, reason: trimmed })), {
+        onConflict: "blocked_date_id",
+      });
+    if (reasonError) throw reasonError;
+  }
 }
+
 
 export async function removeBlockedDate(id: string) {
   const { error } = await supabase.from("blocked_dates").delete().eq("id", id);
