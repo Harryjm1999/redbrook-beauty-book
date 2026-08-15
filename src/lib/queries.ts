@@ -121,3 +121,37 @@ export async function removeBlockedDate(id: string) {
   const { error } = await supabase.from("blocked_dates").delete().eq("id", id);
   if (error) throw error;
 }
+
+const STAFF_BLOCK_NOTE = "Blocked by staff";
+export { STAFF_BLOCK_NOTE };
+
+export async function blockSlot(params: {
+  userId: string;
+  startsAt: string;
+  endsAt: string;
+}) {
+  const { data, error } = await supabase
+    .from("bookings")
+    .insert({
+      user_id: params.userId,
+      starts_at: params.startsAt,
+      ends_at: params.endsAt,
+      status: "pending",
+    })
+    .select("id")
+    .single();
+  if (error) throw error;
+  const { error: updateError } = await supabase
+    .from("bookings")
+    .update({ status: "confirmed", staff_notes: STAFF_BLOCK_NOTE })
+    .eq("id", data.id);
+  if (updateError) throw updateError;
+}
+
+export async function unblockSlot(bookingId: string) {
+  const { error } = await supabase
+    .from("bookings")
+    .update({ status: "cancelled" })
+    .eq("id", bookingId);
+  if (error) throw error;
+}

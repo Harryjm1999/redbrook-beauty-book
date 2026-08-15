@@ -1,12 +1,14 @@
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { format, isSameDay } from "date-fns";
 
 import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { OPENING_HOURS, SLOT_STEP_MINUTES, minutesToLabel, toDateKey } from "@/lib/clinic";
-import { fetchBlockedDates } from "@/lib/queries";
+import { Switch } from "@/components/ui/switch";
+import { STAFF_BLOCK_NOTE, blockSlot, fetchBlockedDates, unblockSlot } from "@/lib/queries";
 import type { Booking, Profile } from "@/lib/queries";
 
 type DiaryBooking = Booking & {
@@ -14,8 +16,34 @@ type DiaryBooking = Booking & {
   patient: Profile | null;
 };
 
-export function DiaryCalendar({ bookings, isLoading }: { bookings: DiaryBooking[]; isLoading: boolean }) {
+export function DiaryCalendar({
+  bookings,
+  isLoading,
+  userId,
+}: {
+  bookings: DiaryBooking[];
+  isLoading: boolean;
+  userId: string;
+}) {
   const [selected, setSelected] = useState<Date>(new Date());
+  const queryClient = useQueryClient();
+
+  const toggleSlot = useMutation({
+    mutationFn: async (input: { booking: DiaryBooking | null; start: Date; end: Date }) => {
+      if (input.booking) return unblockSlot(input.booking.id);
+      return blockSlot({
+        userId,
+        startsAt: input.start.toISOString(),
+        endsAt: input.end.toISOString(),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["all-bookings"] });
+      queryClient.invalidateQueries({ queryKey: ["busy"] });
+      toast.success("Slot updated.");
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
 
   const { data: blocked } = useQuery({ queryKey: ["blocked-dates"], queryFn: fetchBlockedDates });
   const blockedKeys = useMemo(() => new Set((blocked ?? []).map((b) => b.day)), [blocked]);
@@ -49,7 +77,7 @@ export function DiaryCalendar({ bookings, isLoading }: { bookings: DiaryBooking[
 
   const slots = useMemo(() => {
     if (!hours) return [];
-    const out: { minutes: number; label: string; booking: DiaryBooking | null }[] = [];
+    const out: { minutes: number; label: string; start: Date; end: Date; booking: DiaryBooking | null }[] = [];
     for (let m = hours.open; m < hours.close; m += SLOT_STEP_MINUTES) {
       const start = new Date(selected);
       start.setHours(0, 0, 0, 0);
@@ -60,7 +88,7 @@ export function DiaryCalendar({ bookings, isLoading }: { bookings: DiaryBooking[
           (b) =>
             start.getTime() < new Date(b.ends_at).getTime() && end.getTime() > new Date(b.starts_at).getTime(),
         ) ?? null;
-      out.push({ minutes: m, label: minutesToLabel(m), booking });
+      out.push({ minutes: m, label: minutesToLabel(m), start, end, booking });
     }
     return out;
   }, [hours, selected, dayBookings]);
@@ -68,7 +96,7 @@ export function DiaryCalendar({ bookings, isLoading }: { bookings: DiaryBooking[
   const upcoming = useMemo(
     () =>
       active
-        .filter((b) => new Date(b.starts_at) >= new Date())
+        .filter((b) => b.staff_notes !== STAFF_BLOCK_NOTE && new Date(b.starts_at) >= new Date())
         .sort((a, b) => a.starts_at.localeCompare(b.starts_at))
         .slice(0, 10),
     [active],
@@ -109,6 +137,7 @@ export function DiaryCalendar({ bookings, isLoading }: { bookings: DiaryBooking[
               {slots.map((slot) => {
                 const taken = Boolean(slot.booking);
                 const confirmed = slot.booking?.status === "confirmed";
+                const isStaffBlock = slot.booking?.staff_notes === STAFF_BLOCK_NOTE;
                 return (
                   <li
                     key={slot.minutes}
@@ -119,7 +148,7 @@ export function DiaryCalendar({ bookings, isLoading }: { bookings: DiaryBooking[
                     }`}
                   >
                     <span className="label-caps">{slot.label}</span>
-                    {slot.booking ? (
+                    {slot.booking && !isStaffBlock ? (
                       <span className="text-right text-xs">
                         {slot.booking.patient?.full_name || "Patient"}
                         <br />
@@ -127,7 +156,17 @@ export function DiaryCalendar({ bookings, isLoading }: { bookings: DiaryBooking[
                         {confirmed ? "" : " (request)"}
                       </span>
                     ) : (
-                      <span className="text-xs">{isBlocked ? "Blocked" : "Free"}</span>
+                      <span className="flex items-center gap-2 text-xs">
+                        {isBlocked ? "Blocked" : isStaffBlock ? "Booked" : "Free"}
+                        <Switch
+                          checked={isStaffBlock}
+                          disabled={toggleSlot.isPending}
+                          aria-label={isStaffBlock ? "Mark slot free" : "Mark slot booked"}
+                          onCheckedChange={() =>
+                            toggleSlot.mutate({ booking: slot.booking, start: slot.start, end: slot.end })
+                          }
+                        />
+                      </span>
                     )}
                   </li>
                 );
