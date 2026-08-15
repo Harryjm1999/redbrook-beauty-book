@@ -1,12 +1,14 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Menu } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/hooks/useAuth";
+import { fetchIsStaff } from "@/lib/queries";
 import { supabase } from "@/integrations/supabase/client";
+
 
 const NAV = [
   { to: "/", label: "Home" },
