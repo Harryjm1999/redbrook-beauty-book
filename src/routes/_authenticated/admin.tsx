@@ -164,7 +164,7 @@ function AdminPage() {
           </TabsTrigger>
         </TabsList>
         <TabsContent value="calendar">
-          <DiaryCalendar bookings={all} isLoading={isLoading} userId={userId} />
+          <DiaryCalendar bookings={bookings ?? []} isLoading={isLoading} userId={userId} />
         </TabsContent>
         <TabsContent value="pending">
           <BookingRequests requests={pending} isLoading={isLoading} />
