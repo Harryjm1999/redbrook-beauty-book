@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { toast } from "sonner";
 
 import { BlockedDates } from "@/components/BlockedDates";
+import { BookingRequests } from "@/components/BookingRequests";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
