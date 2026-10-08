@@ -26,34 +26,37 @@ struct HomeView: View {
   }
 
   private var hero: some View {
-    ZStack {
-      Image("Hero")
-        .resizable()
-        .scaledToFill()
-        .frame(height: 480)
-        .frame(maxWidth: .infinity)
-        .clipped()
-        .accessibilityLabel("Calm treatment room at Redbrook Clinic with eucalyptus in a glass vase")
-
-      VStack(spacing: 20) {
-        Text("Welcome to Redbrook Clinic")
-          .displayCaps(30)
-          .multilineTextAlignment(.center)
-          .accessibilityAddTraits(.isHeader)
-        Text(Clinic.tagline)
-          .bodyText(14)
-          .multilineTextAlignment(.center)
-          .opacity(0.95)
-        Button("Book an appointment") { router.tab = .book }
-          .buttonStyle(.clinic(.secondary, size: .large))
-          .padding(.top, 12)
+    // The photo sits behind a fixed-size frame so its fill never widens the page.
+    Color.clear
+      .frame(maxWidth: .infinity)
+      .frame(height: 480)
+      .background {
+        Image("Hero")
+          .resizable()
+          .scaledToFill()
+          .accessibilityLabel("Calm treatment room at Redbrook Clinic with eucalyptus in a glass vase")
       }
-      .foregroundStyle(Palette.sageForeground)
-      .padding(.horizontal, 28)
-      .padding(.vertical, 40)
-      .background(Palette.sage.opacity(0.9))
-      .padding(.horizontal, 20)
-    }
+      .clipped()
+      .overlay {
+        VStack(spacing: 20) {
+          Text("Welcome to Redbrook Clinic")
+            .displayCaps(30)
+            .multilineTextAlignment(.center)
+            .accessibilityAddTraits(.isHeader)
+          Text(Clinic.tagline)
+            .bodyText(14)
+            .multilineTextAlignment(.center)
+            .opacity(0.95)
+          Button("Book an appointment") { router.tab = .book }
+            .buttonStyle(.clinic(.secondary, size: .large))
+            .padding(.top, 12)
+        }
+        .foregroundStyle(Palette.sageForeground)
+        .padding(.horizontal, 28)
+        .padding(.vertical, 40)
+        .background(Palette.sage.opacity(0.9))
+        .padding(.horizontal, 20)
+      }
   }
 
   private var whatWeDo: some View {

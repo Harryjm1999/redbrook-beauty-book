@@ -87,7 +87,11 @@ private struct PolicyWebView: UIViewRepresentable {
   func makeCoordinator() -> Coordinator { Coordinator(self) }
 
   func makeUIView(context: Context) -> WKWebView {
-    let webView = WKWebView(frame: .zero, configuration: WKWebViewConfiguration())
+    let configuration = WKWebViewConfiguration()
+    configuration.userContentController.addUserScript(
+      WKUserScript(source: Self.tidyScript, injectionTime: .atDocumentEnd, forMainFrameOnly: true)
+    )
+    let webView = WKWebView(frame: .zero, configuration: configuration)
     webView.navigationDelegate = context.coordinator
     webView.isOpaque = false
     webView.backgroundColor = UIColor(Palette.background)
@@ -97,6 +101,28 @@ private struct PolicyWebView: UIViewRepresentable {
   }
 
   func updateUIView(_ webView: WKWebView, context: Context) {}
+
+  /// Hides the website's own floating header, menu and cookie banner so the screen shows
+  /// just the policy under the app's navigation bar. Anything pinned to the viewport
+  /// (position fixed or sticky) is hidden, re-checked briefly as the site finishes loading.
+  private static let tidyScript = """
+    (function () {
+      function tidy() {
+        document.querySelectorAll('body *').forEach(function (el) {
+          var position = window.getComputedStyle(el).position;
+          if (position === 'fixed' || position === 'sticky') {
+            el.style.setProperty('display', 'none', 'important');
+          }
+        });
+      }
+      tidy();
+      var runs = 0;
+      var timer = setInterval(function () {
+        tidy();
+        if (++runs >= 20) clearInterval(timer);
+      }, 500);
+    })();
+    """
 
   final class Coordinator: NSObject, WKNavigationDelegate {
     private let parent: PolicyWebView
