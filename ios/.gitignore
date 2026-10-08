@@ -1,0 +1,7 @@
+# Generated from project.yml by XcodeGen
+Redbrook.xcodeproj/
+Redbrook/Info.plist
+build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
