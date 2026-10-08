@@ -219,6 +219,7 @@ export type Database = {
           starts_at: string
         }[]
       }
+      delete_my_account: { Args: never; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
