@@ -17,11 +17,13 @@ The web app in the rest of this repo is untouched; Lovable never edits anything 
 | Book (request an appointment) | **Book In** tab |
 | My Appointments (bookings, cancel, contact details) | **Appointments** tab |
 | Clinic Diary (calendar, slot blocking, requests, upcoming) | **More → Clinic Diary**, and a button on Appointments, for staff only |
+| redbrookclinic.com Privacy Policy and Records Management Policy | Their own screens, linked at the bottom of every screen and under **More → Policies** |
 
 Added for the App Store:
 
 - **Delete account** on the Appointments tab (Apple requires it for any app with sign-up).
   It needs a small database function first; see "One-off database change" below.
+- Opening hours, slots and appointment times always use UK time, even if the phone is set to another time zone.
 - Tap-to-open in Apple Maps for the clinic address, and tap-to-call/email for patients in the diary.
 
 Left out on purpose:
@@ -120,9 +122,10 @@ Run `xcodegen generate` again whenever files are added to `ios/`. The generated
 4. Fill in the App Store listing:
    - **Screenshots**: 6.9" iPhone (1320 × 2868). Take them from the iPhone 16 Pro Max simulator with ⌘S.
    - **Description, keywords, support URL** (the website works as the support URL).
-   - **Privacy Policy URL**: required. The website doesn't have a privacy page yet; ask Lovable to add one.
-   - **App Privacy**: Contact Info (name, email address, phone number) and User Content (appointment
-     notes), all *linked to the user*, used for *App Functionality*, *not* used for tracking.
+   - **Privacy Policy URL**: `https://www.redbrookclinic.com/privacy`.
+   - **App Privacy**: Contact Info (name, email address, phone number), Health & Fitness → Health
+     (appointment notes can include medical history) and User Content (other appointment notes), all
+     *linked to the user*, used for *App Functionality*, *not* used for tracking.
    - **Age rating**: answer the questionnaire; medical/treatment information is "infrequent/mild".
    - **App Review Information**: give Apple a working patient login (email and password) so the
      reviewer can see booking. Mention that bookings are requests confirmed by the clinic.
@@ -149,5 +152,7 @@ ios/
     Resources/                Fonts, images, app icon, privacy manifest
 ```
 
-`.github/workflows/ios.yml` compiles the app on a Mac in GitHub Actions whenever `ios/` changes.
+`.github/workflows/ios.yml` compiles the app on a Mac in GitHub Actions whenever `ios/` changes, then
+runs it in an iPhone 16 Pro Max simulator and pushes a screenshot of each screen to the
+`ios-screenshots` branch. They are 1320 × 2868, the size App Store Connect asks for.
 `.github/workflows/ios-release.yml` signs and uploads it to TestFlight when run by hand.

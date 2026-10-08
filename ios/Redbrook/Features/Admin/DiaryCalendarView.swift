@@ -10,7 +10,7 @@ struct DiaryCalendarView: View {
   let bookings: [DiaryBooking]
   let isLoading: Bool
 
-  @State private var selected = Calendar.current.startOfDay(for: Date())
+  @State private var selected = Clinic.calendar.startOfDay(for: Date())
   @State private var blocked: [BlockedDate] = []
   @State private var toggling = false
 
@@ -39,7 +39,7 @@ struct DiaryCalendarView: View {
 
   private var slots: [DaySlot] {
     guard let hours = Clinic.hours(on: selected) else { return [] }
-    let calendar = Calendar.current
+    let calendar = Clinic.calendar
     let midnight = calendar.startOfDay(for: selected)
     let dayBookings = active.filter { calendar.isDate($0.booking.startsAt, inSameDayAs: selected) }
     var result: [DaySlot] = []
@@ -202,15 +202,9 @@ struct MonthCalendar: View {
   let pending: Set<String>
   let blocked: Set<String>
 
-  @State private var month = Calendar.current.dateInterval(of: .month, for: Date())!.start
+  @State private var month = Clinic.calendar.dateInterval(of: .month, for: Date())!.start
 
-  private var calendar: Calendar {
-    var calendar = Calendar(identifier: .gregorian)
-    calendar.firstWeekday = 2
-    calendar.timeZone = .current
-    calendar.locale = Locale(identifier: "en_GB")
-    return calendar
-  }
+  private var calendar: Calendar { Clinic.calendar }
 
   private var days: [Date?] {
     guard let range = calendar.range(of: .day, in: .month, for: month) else { return [] }

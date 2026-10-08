@@ -50,6 +50,7 @@ struct AdminView: View {
         "This area is for clinic staff. If you should have access, ask the clinic owner to add your account to the staff list."
       )
       .mutedText(14)
+      PolicyLinks().padding(.top, 40)
     }
     .multilineTextAlignment(.center)
     .foregroundStyle(Palette.foreground)
@@ -84,6 +85,8 @@ struct AdminView: View {
           }
         }
         .padding(.top, 24)
+
+        PolicyLinks().padding(.top, 56)
       }
       .foregroundStyle(Palette.foreground)
       .padding(.horizontal, 20)

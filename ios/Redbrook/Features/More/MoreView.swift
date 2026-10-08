@@ -18,8 +18,8 @@ struct MoreView: View {
   var body: some View {
     List {
       Section {
-        NavigationLink { AboutView() } label: { row("About Us", "person.crop.circle") }
-        NavigationLink { ContactView() } label: { row("Contact", "envelope") }
+        NavigationLink(value: MoreRoute.about) { row("About Us", "person.crop.circle") }
+        NavigationLink(value: MoreRoute.contact) { row("Contact", "envelope") }
         Button { router.tab = .treatments } label: { row("Treatments & Fees", "list.bullet.rectangle") }
       }
 
@@ -27,7 +27,7 @@ struct MoreView: View {
         Section {
           Button { router.tab = .appointments } label: { row("My Appointments", "calendar") }
           if session.isStaff {
-            NavigationLink { AdminView() } label: { row("Clinic Diary", "book.closed") }
+            NavigationLink(value: MoreRoute.diary) { row("Clinic Diary", "book.closed") }
           }
         }
       }
@@ -53,6 +53,15 @@ struct MoreView: View {
       Section {
         Link(destination: Clinic.phoneURL) { row("Call the clinic", "phone") }
         Link(destination: Clinic.emailURL) { row("Email the clinic", "at") }
+      }
+
+      Section {
+        NavigationLink(value: PolicyPage.privacy) { row(PolicyPage.privacy.title, "hand.raised") }
+        NavigationLink(value: PolicyPage.recordsManagement) {
+          row(PolicyPage.recordsManagement.title, "doc.text")
+        }
+      } header: {
+        Text("Policies")
       } footer: {
         Text("Version \(version)")
           .font(AppFont.body(12))
@@ -64,10 +73,19 @@ struct MoreView: View {
     .background(Palette.background)
     .foregroundStyle(Palette.foreground)
     .clinicNavigation()
+    .navigationDestination(for: MoreRoute.self) { route in
+      switch route {
+      case .about: AboutView()
+      case .contact: ContactView()
+      case .diary: AdminView()
+      }
+    }
     .sheet(isPresented: $showingAuth) {
       NavigationStack {
         ScrollView { AuthView(initialMode: .signin) }
           .background(Palette.background)
+          .policyDestinations()
+          .keyboardDoneButton()
           .toolbar {
             ToolbarItem(placement: .cancellationAction) {
               Button("Close") { showingAuth = false }

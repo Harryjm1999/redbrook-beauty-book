@@ -38,6 +38,8 @@ struct AuthView: View {
         }
       }
       .padding(.top, 32)
+
+      PolicyLinks().padding(.top, 48)
     }
     .foregroundStyle(Palette.foreground)
     .padding(.horizontal, 20)

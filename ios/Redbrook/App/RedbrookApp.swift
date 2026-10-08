@@ -41,23 +41,23 @@ struct RootView: View {
     @Bindable var router = router
 
     TabView(selection: $router.tab) {
-      NavigationStack { HomeView() }
+      NavigationStack { HomeView().policyDestinations() }
         .tabItem { Label("Home", systemImage: "house") }
         .tag(AppTab.home)
 
-      NavigationStack { TreatmentsView() }
+      NavigationStack { TreatmentsView().policyDestinations() }
         .tabItem { Label("Treatments", systemImage: "list.bullet.rectangle") }
         .tag(AppTab.treatments)
 
-      NavigationStack { SignedInGate(mode: .signup) { BookView() } }
+      NavigationStack { SignedInGate(mode: .signup) { BookView() }.policyDestinations() }
         .tabItem { Label("Book In", systemImage: "calendar.badge.plus") }
         .tag(AppTab.book)
 
-      NavigationStack { SignedInGate(mode: .signin) { AppointmentsView() } }
+      NavigationStack { SignedInGate(mode: .signin) { AppointmentsView() }.policyDestinations() }
         .tabItem { Label("Appointments", systemImage: "calendar") }
         .tag(AppTab.appointments)
 
-      NavigationStack { MoreView() }
+      NavigationStack(path: $router.morePath) { MoreView().policyDestinations() }
         .tabItem { Label("More", systemImage: "ellipsis.circle") }
         .tag(AppTab.more)
     }

@@ -133,11 +133,14 @@ struct SiteFooter: View {
           .padding(.top, 12)
       }
 
-      Text("© \(Fmt.string(Date(), "yyyy")) \(Clinic.name), Salisbury.")
-        .font(AppFont.body(12))
-        .opacity(0.75)
-        .frame(maxWidth: .infinity)
-        .padding(.top, 8)
+      VStack(spacing: 12) {
+        PolicyLinks(color: Palette.taupeForeground)
+        Text("© \(Fmt.string(Date(), "yyyy")) \(Clinic.name), Salisbury.")
+          .font(AppFont.body(12))
+          .opacity(0.75)
+      }
+      .frame(maxWidth: .infinity)
+      .padding(.top, 8)
     }
     .foregroundStyle(Palette.taupeForeground)
     .tint(Palette.taupeForeground)
@@ -193,8 +196,26 @@ extension View {
             .accessibilityAddTraits(.isHeader)
         }
       }
+      .keyboardDoneButton()
       .toolbarBackground(Palette.cream, for: .navigationBar)
       .toolbarBackground(.visible, for: .navigationBar)
       .background(Palette.background)
+  }
+}
+
+extension View {
+  /// Adds a Done button above the keyboard; the phone-number keypad has no return key.
+  func keyboardDoneButton() -> some View {
+    toolbar {
+      ToolbarItemGroup(placement: .keyboard) {
+        Spacer()
+        Button("Done") {
+          UIApplication.shared.sendAction(
+            #selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil
+          )
+        }
+        .font(AppFont.bodyRegular(16))
+      }
+    }
   }
 }

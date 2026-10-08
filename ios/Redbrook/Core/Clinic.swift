@@ -38,8 +38,19 @@ enum Clinic {
 
   static let slotStepMinutes = 30
 
+  /// Opening hours, slots and times are in clinic time, whatever time zone the phone is in.
+  static let timeZone = TimeZone(identifier: "Europe/London")!
+
+  static var calendar: Calendar {
+    var calendar = Calendar(identifier: .gregorian)
+    calendar.timeZone = timeZone
+    calendar.locale = Locale(identifier: "en_GB")
+    calendar.firstWeekday = 2
+    return calendar
+  }
+
   static func hours(on date: Date) -> (open: Int, close: Int)? {
-    let weekday = Calendar.current.component(.weekday, from: date) - 1
+    let weekday = Clinic.calendar.component(.weekday, from: date) - 1
     return openingHours[weekday]
   }
 }
@@ -58,7 +69,7 @@ enum SlotBuilder {
   /// the ranges already taken by other appointments.
   static func slots(on day: Date, durationMinutes: Int, busy: [BusyRange], now: Date = Date()) -> [Slot] {
     guard let hours = Clinic.hours(on: day) else { return [] }
-    let calendar = Calendar.current
+    let calendar = Clinic.calendar
     let midnight = calendar.startOfDay(for: day)
     var result: [Slot] = []
     var m = hours.open
@@ -94,20 +105,20 @@ enum Fmt {
   static func string(_ date: Date, _ pattern: String) -> String {
     let formatter = DateFormatter()
     formatter.locale = Locale(identifier: "en_GB")
-    formatter.calendar = Calendar(identifier: .gregorian)
-    formatter.timeZone = .current
+    formatter.calendar = Clinic.calendar
+    formatter.timeZone = Clinic.timeZone
     formatter.amSymbol = "am"
     formatter.pmSymbol = "pm"
     formatter.dateFormat = pattern
     return formatter.string(from: date)
   }
 
-  /// `yyyy-MM-dd` in the device's time zone, matching toDateKey in the web app.
+  /// `yyyy-MM-dd` in clinic time, matching toDateKey in the web app.
   static func dateKey(_ date: Date) -> String {
     let formatter = DateFormatter()
     formatter.locale = Locale(identifier: "en_US_POSIX")
-    formatter.calendar = Calendar(identifier: .gregorian)
-    formatter.timeZone = .current
+    formatter.calendar = Clinic.calendar
+    formatter.timeZone = Clinic.timeZone
     formatter.dateFormat = "yyyy-MM-dd"
     return formatter.string(from: date)
   }
@@ -115,8 +126,8 @@ enum Fmt {
   static func date(fromKey key: String) -> Date? {
     let formatter = DateFormatter()
     formatter.locale = Locale(identifier: "en_US_POSIX")
-    formatter.calendar = Calendar(identifier: .gregorian)
-    formatter.timeZone = .current
+    formatter.calendar = Clinic.calendar
+    formatter.timeZone = Clinic.timeZone
     formatter.dateFormat = "yyyy-MM-dd"
     return formatter.date(from: key)
   }

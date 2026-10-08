@@ -23,7 +23,7 @@ struct BookView: View {
   }
 
   private var openDays: [Date] {
-    let calendar = Calendar.current
+    let calendar = Clinic.calendar
     let today = calendar.startOfDay(for: Date())
     return (0..<Self.daysAhead)
       .compactMap { calendar.date(byAdding: .day, value: $0, to: today) }
@@ -55,6 +55,8 @@ struct BookView: View {
           summary
         }
         .padding(.top, 48)
+
+        PolicyLinks().padding(.top, 56)
       }
       .foregroundStyle(Palette.foreground)
       .padding(.horizontal, 20)
@@ -119,7 +121,7 @@ struct BookView: View {
   private func dayButton(_ d: Date) -> some View {
     let key = Fmt.dateKey(d)
     let isBlocked = blocked[key] != nil
-    let selected = day.map { Calendar.current.isDate($0, inSameDayAs: d) } ?? false
+    let selected = day.map { Clinic.calendar.isDate($0, inSameDayAs: d) } ?? false
 
     return Button {
       day = d

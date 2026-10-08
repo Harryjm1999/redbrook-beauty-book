@@ -1,6 +1,7 @@
 import Foundation
 import Observation
 import Supabase
+import SwiftUI
 
 /// Tracks the signed-in patient and whether they are clinic staff.
 /// Mirrors the web app's useAuth hook and the is-staff query.
@@ -41,18 +42,44 @@ final class SessionStore {
   }
 }
 
-enum AppTab: Hashable {
+enum AppTab: String, Hashable {
   case home, treatments, book, appointments, more
+}
+
+/// Screens pushed from the More tab.
+enum MoreRoute: String, Hashable {
+  case about, contact, diary
 }
 
 @MainActor
 @Observable
 final class AppRouter {
   var tab: AppTab = .home
+  var morePath = NavigationPath()
   /// Bumped whenever bookings change so lists reload, like invalidating React Query keys.
   var bookingsVersion = 0
 
   func bookingsChanged() { bookingsVersion += 1 }
+
+  init() {
+    #if DEBUG
+      // Lets the screenshot job open a given screen:
+      //   -screen treatments | book | appointments | more | about | contact | privacy | records
+      let args = ProcessInfo.processInfo.arguments
+      if let index = args.firstIndex(of: "-screen"), index + 1 < args.count {
+        let screen = args[index + 1]
+        if let tab = AppTab(rawValue: screen) {
+          self.tab = tab
+        } else if let route = MoreRoute(rawValue: screen) {
+          tab = .more
+          morePath.append(route)
+        } else if screen == "privacy" || screen == "records" {
+          tab = .more
+          morePath.append(screen == "privacy" ? PolicyPage.privacy : PolicyPage.recordsManagement)
+        }
+      }
+    #endif
+  }
 }
 
 @MainActor

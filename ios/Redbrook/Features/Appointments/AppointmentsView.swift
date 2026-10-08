@@ -30,6 +30,8 @@ struct AppointmentsView: View {
 
         ProfileSection()
           .padding(.top, 64)
+
+        PolicyLinks().padding(.top, 56)
       }
       .foregroundStyle(Palette.foreground)
       .padding(.horizontal, 20)
