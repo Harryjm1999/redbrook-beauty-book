@@ -51,7 +51,49 @@ Paste this into the Lovable chat for this project:
 
 Profiles and bookings are removed automatically because they already use `ON DELETE CASCADE`.
 
-## Building on your Mac
+## Publishing without a Mac (recommended)
+
+The **iOS release to TestFlight** workflow (`.github/workflows/ios-release.yml`) builds, signs
+and uploads the app from GitHub's Macs. Apple manages the signing certificate in the cloud, so
+there is nothing to install. You need a paid Apple Developer Program membership.
+
+One-off setup, all in a web browser:
+
+1. **Find your Team ID**: [developer.apple.com/account](https://developer.apple.com/account) →
+   *Membership details* → *Team ID* (10 characters).
+2. **Create an API key**: [App Store Connect](https://appstoreconnect.apple.com) → *Users and Access*
+   → *Integrations* → *App Store Connect API* → *Team Keys* → **+**. Name it "GitHub", give it the
+   **Admin** role (needed for cloud signing), and click *Generate*. Note the **Key ID** and the
+   **Issuer ID** shown above the list, then **Download API Key** (a `.p8` file; Apple only lets you
+   download it once).
+3. **Register the bundle ID**: developer.apple.com → *Certificates, IDs & Profiles* → *Identifiers*
+   → **+** → *App IDs* → *App*. Description "Redbrook Clinic", Bundle ID *Explicit*
+   `uk.co.redbrookclinic.app`, no extra capabilities. If that ID is taken, pick another and change
+   `PRODUCT_BUNDLE_IDENTIFIER` in `project.yml` to match.
+4. **Create the app record**: App Store Connect → *Apps* → **+** → *New App*. Platform iOS, name
+   "Redbrook Clinic", primary language English (UK), the bundle ID from step 3, SKU `redbrook-ios`.
+5. **Add four repository secrets**: GitHub repo → *Settings* → *Secrets and variables* → *Actions*
+   → *New repository secret*:
+   - `APPLE_TEAM_ID`: the Team ID from step 1
+   - `APP_STORE_CONNECT_KEY_ID`: the Key ID from step 2
+   - `APP_STORE_CONNECT_ISSUER_ID`: the Issuer ID from step 2
+   - `APP_STORE_CONNECT_PRIVATE_KEY`: open the `.p8` file in a text editor and paste all of it,
+     including the `BEGIN` and `END` lines
+
+Each release:
+
+1. GitHub repo → *Actions* → **iOS release to TestFlight** → *Run workflow* (on `main`).
+   (GitHub only offers this button once the workflow is merged into `main`.)
+2. When it goes green, the build shows in App Store Connect → *TestFlight* after Apple's
+   processing (usually 5 to 30 minutes). Install the TestFlight app on your iPhone to try it.
+3. Fill in the listing and submit, as described in "Publishing to the App Store" below (skip its
+   Xcode steps 1 and 2). For screenshots without a Mac, take them on your iPhone from the
+   TestFlight build.
+
+Build numbers come from the workflow run number, so every upload is unique. Raise
+`MARKETING_VERSION` in `project.yml` (e.g. to 1.1) for each new App Store version.
+
+## Building on your Mac (optional)
 
 You need a Mac with Xcode 16.4 or newer and an Apple Developer Program membership.
 
@@ -108,3 +150,4 @@ ios/
 ```
 
 `.github/workflows/ios.yml` compiles the app on a Mac in GitHub Actions whenever `ios/` changes.
+`.github/workflows/ios-release.yml` signs and uploads it to TestFlight when run by hand.
