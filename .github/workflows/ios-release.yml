@@ -10,7 +10,8 @@ on:
 
 jobs:
   release:
-    runs-on: macos-15
+    # Apple only accepts uploads built with Xcode 26 (iOS 26 SDK) or later.
+    runs-on: macos-26
     timeout-minutes: 45
     defaults:
       run:
@@ -44,12 +45,18 @@ jobs:
           printf '%s\n' "$PRIVATE_KEY" > "$RUNNER_TEMP/keys/AuthKey_$KEY_ID.p8"
           echo "KEY_PATH=$RUNNER_TEMP/keys/AuthKey_$KEY_ID.p8" >> "$GITHUB_ENV"
 
+      - name: Show Xcode version
+        run: xcodebuild -version
+
       - name: Install XcodeGen
         run: brew install xcodegen
 
       - name: Generate Xcode project
         run: xcodegen generate
 
+      # The archive is built unsigned. Signing for a development profile would need a
+      # registered iPhone, so the export step below signs it for the App Store instead,
+      # using Apple's cloud-managed distribution certificate.
       - name: Archive
         run: |
           xcodebuild archive \
@@ -60,12 +67,8 @@ jobs:
             -archivePath "$RUNNER_TEMP/Redbrook.xcarchive" \
             -skipPackagePluginValidation \
             -skipMacroValidation \
-            -allowProvisioningUpdates \
-            -authenticationKeyPath "$KEY_PATH" \
-            -authenticationKeyID "$KEY_ID" \
-            -authenticationKeyIssuerID "$ISSUER_ID" \
             DEVELOPMENT_TEAM="$TEAM_ID" \
-            CODE_SIGN_STYLE=Automatic \
+            CODE_SIGNING_ALLOWED=NO \
             CURRENT_PROJECT_VERSION="${{ github.run_number }}" \
             > "$RUNNER_TEMP/archive.log" 2>&1 || {
               grep -E "error:" "$RUNNER_TEMP/archive.log" | sort -u
@@ -96,7 +99,12 @@ jobs:
             -allowProvisioningUpdates \
             -authenticationKeyPath "$KEY_PATH" \
             -authenticationKeyID "$KEY_ID" \
-            -authenticationKeyIssuerID "$ISSUER_ID"
+            -authenticationKeyIssuerID "$ISSUER_ID" || {
+              # Apple's reason is only in the distribution logs, so show them.
+              find "${TMPDIR:-/tmp}" -path '*.xcdistributionlogs/*' -name '*.log' -print0 2>/dev/null \
+                | xargs -0 grep -h -i -E "error|fail|denied|not found|bundle" 2>/dev/null | sort -u | tail -n 80
+              exit 1
+            }
           echo "Uploaded build ${{ github.run_number }}. It appears in App Store Connect → TestFlight after Apple finishes processing."
 
       - name: Remove API key

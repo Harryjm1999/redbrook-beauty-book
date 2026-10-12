@@ -93,7 +93,7 @@ Build numbers come from the workflow run number, so every upload is unique. Rais
 
 ## Building on your Mac (optional)
 
-You need a Mac with Xcode 16.4 or newer and an Apple Developer Program membership.
+You need a Mac with Xcode 26 or newer (Apple rejects uploads from older versions) and an Apple Developer Program membership.
 
 1. Install XcodeGen once: `brew install xcodegen` (install Homebrew from https://brew.sh first if needed).
 2. Get the code: `git clone https://github.com/Harryjm1999/redbrook-beauty-book.git`, or `git pull` if you already have it.
