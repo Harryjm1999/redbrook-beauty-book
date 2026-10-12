@@ -146,7 +146,23 @@ export function LoyaltyAdmin() {
 
   return (
     <div className="mt-6 space-y-4">
-      <Input placeholder="Search clients by name or email" value={search} onChange={(e) => setSearch(e.target.value)} />
+      <div className="space-y-2">
+        <Label htmlFor="loyalty-search" className="label-caps">
+          Search customers
+        </Label>
+        <Input
+          id="loyalty-search"
+          placeholder="Search customers by name or email"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      </div>
+      {!isLoading && list.length > 0 ? (
+        <p className="text-xs text-muted-foreground">
+          {list.length} customer{list.length === 1 ? "" : "s"} found
+        </p>
+      ) : null}
+
       {isLoading ? (
         <Skeleton className="h-40 w-full" />
       ) : list.length === 0 ? (

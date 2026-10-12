@@ -66,6 +66,23 @@ function AppointmentsPage() {
     onError: (error: Error) => toast.error(error.message),
   });
 
+  const removePast = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from("bookings")
+        .delete()
+        .eq("user_id", userId)
+        .lt("starts_at", new Date().toISOString());
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["my-bookings"] });
+      queryClient.invalidateQueries({ queryKey: ["busy"] });
+      toast.success("Previous appointments removed.");
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
   return (
     <section className="mx-auto max-w-4xl px-5 py-16">
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -133,6 +150,25 @@ function AppointmentsPage() {
           ))}
         </ul>
       )}
+
+      {bookings && bookings.some((b) => new Date(b.starts_at) < new Date()) ? (
+        <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border border-border bg-card p-6">
+          <div>
+            <h2 className="label-caps text-sm">Previous appointments</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Appointments with dates that have already passed can be removed from your list.
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            className="label-caps"
+            onClick={() => removePast.mutate()}
+            disabled={removePast.isPending}
+          >
+            {removePast.isPending ? "Removing…" : "Remove all previous bookings"}
+          </Button>
+        </div>
+      ) : null}
 
       <LoyaltyCard userId={userId} />
       <ProfileCard userId={userId} />
