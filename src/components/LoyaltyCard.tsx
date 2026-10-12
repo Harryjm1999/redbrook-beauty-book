@@ -12,7 +12,7 @@ export function LoyaltyCard({ userId }: { userId: string }) {
 
   return (
     <div className="mt-20 border-t border-border pt-10">
-      <h2 className="display-caps text-2xl">Loyalty card</h2>
+      <h2 className="display-caps text-2xl">Loyalty points</h2>
       <div className="mt-6 border border-border bg-card p-6">
         <p className="text-3xl">{total} points</p>
         <p className="mt-4 text-sm">{vouchersFor(total)} £10 voucher(s) available</p>
