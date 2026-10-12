@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { toast } from "sonner";
 
+import { LoyaltyAdmin } from "@/components/LoyaltyAdmin";
 import { BookingRequests } from "@/components/BookingRequests";
 import { DiaryCalendar } from "@/components/DiaryCalendar";
 import { Badge } from "@/components/ui/badge";
@@ -162,6 +163,9 @@ function AdminPage() {
           <TabsTrigger value="upcoming" className="label-caps">
             Upcoming ({upcoming.length})
           </TabsTrigger>
+          <TabsTrigger value="loyalty" className="label-caps">
+            Loyalty
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="calendar">
           <DiaryCalendar bookings={bookings ?? []} isLoading={isLoading} userId={userId} />
@@ -170,6 +174,9 @@ function AdminPage() {
           <BookingRequests requests={pending} isLoading={isLoading} />
         </TabsContent>
         <TabsContent value="upcoming">{renderList(upcoming)}</TabsContent>
+        <TabsContent value="loyalty">
+          <LoyaltyAdmin />
+        </TabsContent>
       </Tabs>
     </section>
   );
