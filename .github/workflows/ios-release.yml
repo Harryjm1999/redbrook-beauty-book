@@ -95,7 +95,12 @@ jobs:
             -allowProvisioningUpdates \
             -authenticationKeyPath "$KEY_PATH" \
             -authenticationKeyID "$KEY_ID" \
-            -authenticationKeyIssuerID "$ISSUER_ID"
+            -authenticationKeyIssuerID "$ISSUER_ID" || {
+              # Apple's reason is only in the distribution logs, so show them.
+              find "${TMPDIR:-/tmp}" -path '*.xcdistributionlogs/*' -name '*.log' -print0 2>/dev/null \
+                | xargs -0 grep -h -i -E "error|fail|denied|not found|bundle" 2>/dev/null | sort -u | tail -n 80
+              exit 1
+            }
           echo "Uploaded build ${{ github.run_number }}. It appears in App Store Connect → TestFlight after Apple finishes processing."
 
       - name: Remove API key
