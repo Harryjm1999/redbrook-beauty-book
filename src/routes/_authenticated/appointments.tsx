@@ -151,6 +151,26 @@ function AppointmentsPage() {
         </ul>
       )}
 
+      {bookings && bookings.some((b) => new Date(b.starts_at) < new Date()) ? (
+        <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border border-border bg-card p-6">
+          <div>
+            <h2 className="label-caps text-sm">Previous appointments</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Appointments with dates that have already passed can be removed from your list.
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            className="label-caps"
+            onClick={() => removePast.mutate()}
+            disabled={removePast.isPending}
+          >
+            {removePast.isPending ? "Removing…" : "Remove all previous bookings"}
+          </Button>
+        </div>
+      ) : null}
+      )}
+
       <LoyaltyCard userId={userId} />
       <ProfileCard userId={userId} />
     </section>
