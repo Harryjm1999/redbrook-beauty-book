@@ -114,6 +114,44 @@ export type Database = {
           },
         ]
       }
+      loyalty_transactions: {
+        Row: {
+          amount_spent: number | null
+          created_at: string
+          created_by: string | null
+          id: string
+          note: string | null
+          points: number
+          user_id: string
+        }
+        Insert: {
+          amount_spent?: number | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note?: string | null
+          points: number
+          user_id: string
+        }
+        Update: {
+          amount_spent?: number | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note?: string | null
+          points?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loyalty_transactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -228,6 +266,7 @@ export type Database = {
         Returns: boolean
       }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
+      redeem_loyalty_voucher: { Args: { _user_id: string }; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "staff" | "patient"

@@ -8,6 +8,13 @@
       "when": 1791479385475,
       "tag": "0000_delete_my_account",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791809502927,
+      "tag": "0001_loyalty_points",
+      "breakpoints": true
     }
   ]
 }
