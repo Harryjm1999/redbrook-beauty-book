@@ -9,6 +9,13 @@ struct AppointmentsView: View {
 
   @State private var bookings: [Booking]?
   @State private var cancelling = false
+  @State private var removingPast = false
+  @State private var confirmingRemovePast = false
+
+  private var hasPast: Bool {
+    let now = Date()
+    return bookings?.contains { $0.startsAt < now } ?? false
+  }
 
   var body: some View {
     ScrollView {
@@ -27,6 +34,13 @@ struct AppointmentsView: View {
         .padding(.top, 16)
 
         list.padding(.top, 40)
+
+        if hasPast {
+          previousAppointments.padding(.top, 32)
+        }
+
+        LoyaltyCardSection()
+          .padding(.top, 64)
 
         ProfileSection()
           .padding(.top, 64)
@@ -94,6 +108,41 @@ struct AppointmentsView: View {
       }
     }
     .cardBox(padding: 22)
+  }
+
+  private var previousAppointments: some View {
+    VStack(alignment: .leading, spacing: 0) {
+      Text("Previous appointments").labelCaps(13)
+      Text("Appointments with dates that have already passed can be removed from your list.")
+        .mutedText(14)
+        .padding(.top, 4)
+      Button(removingPast ? "Removing…" : "Remove all previous bookings") { confirmingRemovePast = true }
+        .buttonStyle(.clinic(.outline))
+        .disabled(removingPast)
+        .padding(.top, 16)
+    }
+    .cardBox(padding: 22)
+    .alert("Remove previous bookings?", isPresented: $confirmingRemovePast) {
+      Button("Remove", role: .destructive, action: removePast)
+      Button("Keep them", role: .cancel) {}
+    } message: {
+      Text("Appointments with dates that have passed will be removed from your list.")
+    }
+  }
+
+  private func removePast() {
+    guard let userId = session.user?.id else { return }
+    removingPast = true
+    Task {
+      do {
+        try await API.removePastBookings(userId: userId)
+        toaster.success("Previous appointments removed.")
+        router.bookingsChanged()
+      } catch {
+        toaster.error(error)
+      }
+      removingPast = false
+    }
   }
 
   private func load() async {
