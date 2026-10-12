@@ -50,6 +50,9 @@ jobs:
       - name: Generate Xcode project
         run: xcodegen generate
 
+      # The archive is built unsigned. Signing for a development profile would need a
+      # registered iPhone, so the export step below signs it for the App Store instead,
+      # using Apple's cloud-managed distribution certificate.
       - name: Archive
         run: |
           xcodebuild archive \
@@ -60,12 +63,8 @@ jobs:
             -archivePath "$RUNNER_TEMP/Redbrook.xcarchive" \
             -skipPackagePluginValidation \
             -skipMacroValidation \
-            -allowProvisioningUpdates \
-            -authenticationKeyPath "$KEY_PATH" \
-            -authenticationKeyID "$KEY_ID" \
-            -authenticationKeyIssuerID "$ISSUER_ID" \
             DEVELOPMENT_TEAM="$TEAM_ID" \
-            CODE_SIGN_STYLE=Automatic \
+            CODE_SIGNING_ALLOWED=NO \
             CURRENT_PROJECT_VERSION="${{ github.run_number }}" \
             > "$RUNNER_TEMP/archive.log" 2>&1 || {
               grep -E "error:" "$RUNNER_TEMP/archive.log" | sort -u
