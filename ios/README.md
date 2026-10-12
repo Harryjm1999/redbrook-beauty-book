@@ -15,14 +15,14 @@ The web app in the rest of this repo is untouched; Lovable never edits anything 
 | About Us, Contact | **More** tab |
 | Sign in / Sign up | Shown on the **Book In** and **Appointments** tabs until you sign in, and from **More** |
 | Book (request an appointment) | **Book In** tab |
-| My Appointments (bookings, cancel, contact details) | **Appointments** tab |
-| Clinic Diary (calendar, slot blocking, requests, upcoming) | **More → Clinic Diary**, and a button on Appointments, for staff only |
+| My Appointments (bookings, cancel, remove previous bookings, loyalty points, contact details) | **Appointments** tab |
+| Clinic Diary (calendar, slot blocking, requests, upcoming, loyalty) | **More → Clinic Diary**, and a button on Appointments, for staff only |
 | redbrookclinic.com Privacy Policy and Records Management Policy | Their own screens, linked at the bottom of every screen and under **More → Policies** |
 
 Added for the App Store:
 
 - **Delete account** on the Appointments tab (Apple requires it for any app with sign-up).
-  It needs a small database function first; see "One-off database change" below.
+  It uses the `delete_my_account` database function, which is already live.
 - Opening hours, slots and appointment times always use UK time, even if the phone is set to another time zone.
 - Tap-to-open in Apple Maps for the clinic address, and tap-to-call/email for patients in the diary.
 
@@ -42,16 +42,12 @@ Screen layouts and wording are separate copies. When you change a page in Lovabl
 project to "carry over the latest Lovable changes to the iOS app" and the change will be ported
 into `ios/`, then shipped in the next App Store update.
 
-## One-off database change (needed for Delete account)
+## Loyalty points
 
-Paste this into the Lovable chat for this project:
-
-> Add a Postgres function `public.delete_my_account()` (security definer, search_path public)
-> that raises an exception if `auth.uid()` is null and otherwise runs
-> `delete from auth.users where id = auth.uid();`. Revoke execute from public and anon and grant
-> execute to authenticated. Don't change anything else.
-
-Profiles and bookings are removed automatically because they already use `ON DELETE CASCADE`.
+Clients earn 1 point per £3 spent (100 points per £300), and 100 points is a £10 voucher.
+Staff add points and redeem vouchers under **Clinic Diary → Loyalty**; clients see their points
+on the Appointments tab. The rules live in `Loyalty` in `Core/Models.swift` (app) and
+`src/lib/loyalty.ts` (website), so change both if they change.
 
 ## Publishing without a Mac (recommended)
 

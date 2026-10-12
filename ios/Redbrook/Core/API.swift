@@ -95,6 +95,16 @@ enum API {
       .execute()
   }
 
+  /// Removes the patient's own appointments whose date has passed.
+  static func removePastBookings(userId: UUID) async throws {
+    try await supabase
+      .from("bookings")
+      .delete(returning: .minimal)
+      .eq("user_id", value: userId.db)
+      .lt("starts_at", value: Fmt.iso(Date()))
+      .execute()
+  }
+
   // MARK: Profile and roles
 
   static func myProfile(userId: UUID) async throws -> Profile? {
@@ -190,5 +200,47 @@ enum API {
 
   static func unblockSlot(bookingId: UUID) async throws {
     try await setStatus(bookingId: bookingId, status: .cancelled)
+  }
+
+  // MARK: Loyalty points
+
+  /// A client's own points history, or every client's when `userId` is nil (staff only).
+  static func loyalty(userId: UUID? = nil) async throws -> [LoyaltyTransaction] {
+    var query = supabase.from("loyalty_transactions").select()
+    if let userId { query = query.eq("user_id", value: userId.db) }
+    return try await query.order("created_at", ascending: false).execute().value
+  }
+
+  static func allClients() async throws -> [Profile] {
+    try await supabase
+      .from("profiles")
+      .select("id, full_name, email")
+      .order("full_name", ascending: true)
+      .execute()
+      .value
+  }
+
+  private struct NewLoyaltyTransaction: Encodable {
+    let user_id: String
+    let points: Int
+    let amount_spent: Double?
+    let note: String?
+  }
+
+  static func addPoints(userId: UUID, points: Int, amountSpent: Double?, note: String?) async throws {
+    try await supabase
+      .from("loyalty_transactions")
+      .insert(
+        NewLoyaltyTransaction(user_id: userId.db, points: points, amount_spent: amountSpent, note: note),
+        returning: .minimal
+      )
+      .execute()
+  }
+
+  /// Takes 100 points off the client for a £10 voucher. The database checks they have enough.
+  static func redeemVoucher(userId: UUID) async throws {
+    try await supabase
+      .rpc("redeem_loyalty_voucher", params: ["_user_id": userId.db])
+      .execute()
   }
 }

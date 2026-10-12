@@ -6,7 +6,7 @@ struct AdminView: View {
   @Environment(AppRouter.self) private var router
   @Environment(Toaster.self) private var toaster
 
-  enum Section: Hashable { case calendar, pending, upcoming }
+  enum Section: Hashable { case calendar, pending, upcoming, loyalty }
 
   @State private var section: Section = .calendar
   @State private var bookings: [DiaryBooking]?
@@ -66,12 +66,15 @@ struct AdminView: View {
           .mutedText(14)
           .padding(.top, 16)
 
-        Picker("Section", selection: $section) {
-          Text("CALENDAR").tag(Section.calendar)
-          Text("REQUESTS (\(pending.count))").tag(Section.pending)
-          Text("UPCOMING (\(upcoming.count))").tag(Section.upcoming)
-        }
-        .pickerStyle(.segmented)
+        DiaryTabs(
+          selection: $section,
+          tabs: [
+            (.calendar, "Calendar"),
+            (.pending, "Requests (\(pending.count))"),
+            (.upcoming, "Upcoming (\(upcoming.count))"),
+            (.loyalty, "Loyalty"),
+          ]
+        )
         .padding(.top, 32)
 
         Group {
@@ -82,6 +85,8 @@ struct AdminView: View {
             BookingRequestsView(requests: pending, isLoading: bookings == nil)
           case .upcoming:
             upcomingList
+          case .loyalty:
+            LoyaltyAdminView()
           }
         }
         .padding(.top, 24)
@@ -200,6 +205,40 @@ struct PatientContact: View {
       .font(AppFont.body(13))
       .foregroundStyle(Palette.mutedForeground)
       .tint(Palette.foreground)
+    }
+  }
+}
+
+/// The diary's section switcher. Scrolls sideways when the labels don't fit,
+/// so four sections stay readable on smaller iPhones.
+private struct DiaryTabs: View {
+  @Binding var selection: AdminView.Section
+  let tabs: [(AdminView.Section, String)]
+
+  var body: some View {
+    ScrollView(.horizontal, showsIndicators: false) {
+      HStack(spacing: 2) {
+        ForEach(tabs, id: \.0) { item in
+          let (tab, title) = item
+          let isSelected = selection == tab
+          Button {
+            selection = tab
+          } label: {
+            Text(title)
+              .labelCaps(11.5)
+              .foregroundStyle(isSelected ? Palette.foreground : Palette.mutedForeground)
+              .padding(.horizontal, 12)
+              .padding(.vertical, 9)
+              .background(isSelected ? Palette.card : Color.clear)
+              .clipShape(RoundedRectangle(cornerRadius: 2))
+          }
+          .buttonStyle(.plain)
+          .accessibilityAddTraits(isSelected ? .isSelected : [])
+        }
+      }
+      .padding(3)
+      .background(Palette.muted)
+      .clipShape(RoundedRectangle(cornerRadius: 3))
     }
   }
 }

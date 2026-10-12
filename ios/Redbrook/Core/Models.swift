@@ -139,3 +139,41 @@ struct BlockedDate: Decodable, Identifiable, Hashable {
     }
   }
 }
+
+/// One change to a client's loyalty points: positive when staff add points,
+/// negative when a voucher is redeemed. Mirrors src/lib/loyalty.ts.
+struct LoyaltyTransaction: Decodable, Identifiable, Hashable {
+  let id: UUID
+  let userId: UUID
+  let points: Int
+  let amountSpent: Double?
+  let note: String?
+  let createdAt: Date
+
+  enum CodingKeys: String, CodingKey {
+    case id, points, note
+    case userId = "user_id"
+    case amountSpent = "amount_spent"
+    case createdAt = "created_at"
+  }
+}
+
+/// The clinic's loyalty rules: £300 spent earns 100 points, and 100 points is a £10 voucher.
+enum Loyalty {
+  static let poundsPerPoint = 3.0
+  static let pointsPerVoucher = 100
+
+  static func points(forSpend pounds: Double) -> Int {
+    guard pounds.isFinite, pounds > 0 else { return 0 }
+    return Int((pounds / poundsPerPoint).rounded(.down))
+  }
+
+  static func vouchers(for total: Int) -> Int { max(0, total / pointsPerVoucher) }
+
+  static func total(_ items: [LoyaltyTransaction]) -> Int { items.reduce(0) { $0 + $1.points } }
+
+  static func vouchersLabel(_ total: Int) -> String {
+    let count = vouchers(for: total)
+    return "\(count) £10 voucher\(count == 1 ? "" : "s") available"
+  }
+}
