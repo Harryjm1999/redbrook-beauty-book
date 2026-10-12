@@ -169,7 +169,6 @@ function AppointmentsPage() {
           </Button>
         </div>
       ) : null}
-      )}
 
       <LoyaltyCard userId={userId} />
       <ProfileCard userId={userId} />
