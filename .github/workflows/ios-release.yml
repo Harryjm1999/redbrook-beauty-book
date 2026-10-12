@@ -10,7 +10,8 @@ on:
 
 jobs:
   release:
-    runs-on: macos-15
+    # Apple only accepts uploads built with Xcode 26 (iOS 26 SDK) or later.
+    runs-on: macos-26
     timeout-minutes: 45
     defaults:
       run:
@@ -43,6 +44,9 @@ jobs:
           mkdir -p "$RUNNER_TEMP/keys"
           printf '%s\n' "$PRIVATE_KEY" > "$RUNNER_TEMP/keys/AuthKey_$KEY_ID.p8"
           echo "KEY_PATH=$RUNNER_TEMP/keys/AuthKey_$KEY_ID.p8" >> "$GITHUB_ENV"
+
+      - name: Show Xcode version
+        run: xcodebuild -version
 
       - name: Install XcodeGen
         run: brew install xcodegen
