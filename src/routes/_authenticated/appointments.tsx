@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { LoyaltyCard } from "@/components/LoyaltyCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -133,6 +134,7 @@ function AppointmentsPage() {
         </ul>
       )}
 
+      <LoyaltyCard userId={userId} />
       <ProfileCard userId={userId} />
     </section>
   );
