@@ -15,6 +15,13 @@
       "when": 1791809502927,
       "tag": "0001_loyalty_points",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791809945506,
+      "tag": "0002_patients_delete_own_past_bookings",
+      "breakpoints": true
     }
   ]
 }

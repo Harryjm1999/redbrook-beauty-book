@@ -66,6 +66,23 @@ function AppointmentsPage() {
     onError: (error: Error) => toast.error(error.message),
   });
 
+  const removePast = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from("bookings")
+        .delete()
+        .eq("user_id", userId)
+        .lt("starts_at", new Date().toISOString());
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["my-bookings"] });
+      queryClient.invalidateQueries({ queryKey: ["busy"] });
+      toast.success("Previous appointments removed.");
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
   return (
     <section className="mx-auto max-w-4xl px-5 py-16">
       <div className="flex flex-wrap items-center justify-between gap-4">
