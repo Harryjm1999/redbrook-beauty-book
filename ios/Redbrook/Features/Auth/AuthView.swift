@@ -111,11 +111,14 @@ private struct SignUpForm: View {
 
   var body: some View {
     if sent {
-      (Text("We've sent a confirmation link to ")
-        + Text(email).foregroundColor(Palette.foreground).font(AppFont.bodyRegular(14))
-        + Text(". Click it to activate your account, then sign in to request an appointment."))
-        .mutedText(14)
-        .frame(maxWidth: .infinity, alignment: .leading)
+      VStack(alignment: .leading, spacing: 24) {
+        (Text("We've sent a confirmation link to ")
+          + Text(email).foregroundColor(Palette.foreground).font(AppFont.bodyRegular(14))
+          + Text(". Click it to activate your account, then sign in to request an appointment."))
+          .mutedText(14)
+          .frame(maxWidth: .infinity, alignment: .leading)
+        ResendVerification(email: email)
+      }
     } else {
       VStack(alignment: .leading, spacing: 20) {
         VStack(alignment: .leading, spacing: 8) {
@@ -153,6 +156,9 @@ private struct SignUpForm: View {
         Button(busy ? "Creating account…" : "Create account", action: submit)
           .buttonStyle(.clinic(.primary, fullWidth: true))
           .disabled(!canSubmit)
+
+        Divider().overlay(Palette.border).padding(.top, 12)
+        ResendVerification(email: "")
       }
     }
   }
@@ -177,6 +183,51 @@ private struct SignUpForm: View {
           sent = true
           toaster.success("Almost there — check your email to confirm your account.")
         }
+      } catch {
+        toaster.error(error)
+      }
+      busy = false
+    }
+  }
+}
+
+/// Sends the sign-up confirmation email again, for people whose first one
+/// never arrived or expired.
+private struct ResendVerification: View {
+  @Environment(Toaster.self) private var toaster
+  @State private var email: String
+  @State private var busy = false
+
+  init(email: String) {
+    _email = State(initialValue: email)
+  }
+
+  private var trimmed: String { email.trimmingCharacters(in: .whitespaces) }
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 12) {
+      FieldLabel("Didn't get your verification email?")
+      TextField("Your email address", text: $email)
+        .textContentType(.emailAddress)
+        .keyboardType(.emailAddress)
+        .textInputAutocapitalization(.never)
+        .autocorrectionDisabled()
+        .clinicField()
+        .accessibilityLabel("Email for verification")
+        .onSubmit(resend)
+      Button(busy ? "Sending…" : "Resend verification email", action: resend)
+        .buttonStyle(.clinic(.outline, fullWidth: true))
+        .disabled(busy || trimmed.isEmpty)
+    }
+  }
+
+  private func resend() {
+    guard !busy, !trimmed.isEmpty else { return }
+    busy = true
+    Task {
+      do {
+        try await supabase.auth.resend(email: trimmed, type: .signup)
+        toaster.success("Verification email sent. Please check your inbox and spam folder.")
       } catch {
         toaster.error(error)
       }

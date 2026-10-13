@@ -46,11 +46,11 @@ jobs:
           tail -n 40 build.log
           exit $status
 
-  # Runs the app in an iPhone 16 Pro Max simulator, screenshots each screen and
+  # Runs the app in a 6.9" iPhone simulator, screenshots each screen and
   # pushes them to the `ios-screenshots` branch so they can be reviewed (and used
   # for the App Store's 6.9" screenshots, which are exactly this size).
   screenshots:
-    runs-on: macos-15
+    runs-on: macos-26
     timeout-minutes: 40
     permissions:
       contents: write
@@ -63,6 +63,14 @@ jobs:
         run: brew install xcodegen
       - name: Generate Xcode project
         run: xcodegen generate
+      - name: Pick a 6.9-inch iPhone simulator
+        run: |
+          # The simulators installed on the runner change over time, so use
+          # whichever Pro Max is there (they all share the 6.9" screen size).
+          xcrun simctl list devices available
+          device=$(xcrun simctl list devices available | grep -oE "iPhone [0-9]+ Pro Max" | sort -V | tail -n 1)
+          test -n "$device"
+          echo "DEVICE=$device" >> "$GITHUB_ENV"
       - name: Build for the simulator
         run: |
           status=0
@@ -70,7 +78,7 @@ jobs:
             -project Redbrook.xcodeproj \
             -scheme Redbrook \
             -configuration Debug \
-            -destination 'platform=iOS Simulator,name=iPhone 16 Pro Max' \
+            -destination "platform=iOS Simulator,name=$DEVICE" \
             -derivedDataPath build \
             -skipPackagePluginValidation \
             -skipMacroValidation \
@@ -82,8 +90,8 @@ jobs:
       - name: Take screenshots
         run: |
           set -x
-          xcrun simctl boot "iPhone 16 Pro Max" || true
-          xcrun simctl bootstatus "iPhone 16 Pro Max" -b
+          xcrun simctl boot "$DEVICE" || true
+          xcrun simctl bootstatus "$DEVICE" -b
           xcrun simctl status_bar booted override --time "9:41" --dataNetwork wifi --wifiBars 3 --cellularBars 4 --batteryState charged --batteryLevel 100
           xcrun simctl install booted build/Build/Products/Debug-iphonesimulator/Redbrook.app
           mkdir -p shots
