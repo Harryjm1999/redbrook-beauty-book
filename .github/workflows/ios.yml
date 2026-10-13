@@ -16,7 +16,8 @@ on:
 
 jobs:
   build:
-    runs-on: macos-15
+    # Same Xcode as the TestFlight release, so a green check means it will upload.
+    runs-on: macos-26
     timeout-minutes: 30
     defaults:
       run:

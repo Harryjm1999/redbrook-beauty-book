@@ -8,7 +8,11 @@ struct AdminView: View {
 
   enum Section: Hashable { case calendar, pending, upcoming, loyalty }
 
-  @State private var section: Section = .calendar
+  @State private var section: Section
+
+  init(initialSection: Section = .calendar) {
+    _section = State(initialValue: initialSection)
+  }
   @State private var bookings: [DiaryBooking]?
   @State private var updating = false
 
@@ -209,36 +213,39 @@ struct PatientContact: View {
   }
 }
 
-/// The diary's section switcher. Scrolls sideways when the labels don't fit,
-/// so four sections stay readable on smaller iPhones.
+/// The diary's section switcher: two rows of two, so every section, Loyalty included,
+/// is visible on any iPhone without scrolling.
 private struct DiaryTabs: View {
   @Binding var selection: AdminView.Section
   let tabs: [(AdminView.Section, String)]
 
+  private let columns = [GridItem(.flexible(), spacing: 3), GridItem(.flexible(), spacing: 3)]
+
   var body: some View {
-    ScrollView(.horizontal, showsIndicators: false) {
-      HStack(spacing: 2) {
-        ForEach(tabs, id: \.0) { item in
-          let (tab, title) = item
-          let isSelected = selection == tab
-          Button {
-            selection = tab
-          } label: {
-            Text(title)
-              .labelCaps(11.5)
-              .foregroundStyle(isSelected ? Palette.foreground : Palette.mutedForeground)
-              .padding(.horizontal, 12)
-              .padding(.vertical, 9)
-              .background(isSelected ? Palette.card : Color.clear)
-              .clipShape(RoundedRectangle(cornerRadius: 2))
-          }
-          .buttonStyle(.plain)
-          .accessibilityAddTraits(isSelected ? .isSelected : [])
+    LazyVGrid(columns: columns, spacing: 3) {
+      ForEach(tabs, id: \.0) { item in
+        let (tab, title) = item
+        let isSelected = selection == tab
+        Button {
+          selection = tab
+        } label: {
+          Text(title)
+            .labelCaps(11.5)
+            .lineLimit(1)
+            .minimumScaleFactor(0.8)
+            .foregroundStyle(isSelected ? Palette.foreground : Palette.mutedForeground)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 10)
+            .background(isSelected ? Palette.card : Color.clear)
+            .clipShape(RoundedRectangle(cornerRadius: 2))
+            .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
       }
-      .padding(3)
-      .background(Palette.muted)
-      .clipShape(RoundedRectangle(cornerRadius: 3))
     }
+    .padding(3)
+    .background(Palette.muted)
+    .clipShape(RoundedRectangle(cornerRadius: 3))
   }
 }

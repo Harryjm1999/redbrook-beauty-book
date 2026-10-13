@@ -28,6 +28,9 @@ struct MoreView: View {
           Button { router.tab = .appointments } label: { row("My Appointments", "calendar") }
           if session.isStaff {
             NavigationLink(value: MoreRoute.diary) { row("Clinic Diary", "book.closed") }
+            NavigationLink(value: MoreRoute.loyalty) { row("Loyalty Points (staff)", "star") }
+          } else {
+            Button { router.tab = .appointments } label: { row("My Loyalty Points", "star") }
           }
         }
       }
@@ -78,6 +81,7 @@ struct MoreView: View {
       case .about: AboutView()
       case .contact: ContactView()
       case .diary: AdminView()
+      case .loyalty: AdminView(initialSection: .loyalty)
       }
     }
     .sheet(isPresented: $showingAuth) {
