@@ -53,29 +53,32 @@ struct LoyaltyCardSection: View {
   @Environment(AppRouter.self) private var router
 
   @State private var items: [LoyaltyTransaction]?
+  @State private var showingHistory = false
 
   var body: some View {
     let total = Loyalty.total(items ?? [])
     VStack(alignment: .leading, spacing: 0) {
-      Divider1()
-      Text("Loyalty points")
-        .displayCaps(24)
-        .padding(.top, 40)
-        .accessibilityAddTraits(.isHeader)
-
       if items == nil {
-        SkeletonBlock(height: 120).padding(.top, 24)
+        SkeletonBlock(height: 120)
       } else {
         VStack(alignment: .leading, spacing: 0) {
-          Text("\(total) points").bodyText(30)
-          Text(Loyalty.vouchersLabel(total)).bodyText(14).padding(.top, 16)
-          Text("100 points = a £10 voucher.").mutedText(14).padding(.top, 8)
+          Text("Loyalty points")
+            .labelCaps()
+            .foregroundStyle(Palette.mutedForeground)
+            .accessibilityAddTraits(.isHeader)
+          Text("\(total) points").bodyText(30).padding(.top, 8)
+          Text(Loyalty.vouchersLabel(total)).bodyText(14).padding(.top, 12)
+          Text("100 points = a £10 voucher.").mutedText(14).padding(.top, 4)
+
+          DisclosureGroup(isExpanded: $showingHistory) {
+            LoyaltyHistoryList(items: items ?? []).padding(.top, 12)
+          } label: {
+            Text("Points history").labelCaps().foregroundStyle(Palette.foreground)
+          }
+          .tint(Palette.foreground)
+          .padding(.top, 20)
         }
         .cardBox(padding: 24)
-        .padding(.top, 24)
-
-        FieldLabel("Points history").padding(.top, 32).padding(.bottom, 12)
-        LoyaltyHistoryList(items: items ?? [])
       }
     }
     .task(id: "\(session.user?.id.uuidString ?? "")-\(router.bookingsVersion)") { await load() }

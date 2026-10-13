@@ -48,7 +48,7 @@ enum AppTab: String, Hashable {
 
 /// Screens pushed from the More tab.
 enum MoreRoute: String, Hashable {
-  case about, contact, diary
+  case about, contact, diary, loyalty
 }
 
 @MainActor

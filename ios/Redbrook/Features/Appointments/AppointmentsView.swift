@@ -33,14 +33,19 @@ struct AppointmentsView: View {
         }
         .padding(.top, 16)
 
-        list.padding(.top, 40)
+        // Near the top so patients see their points without scrolling past every booking.
+        LoyaltyCardSection()
+          .padding(.top, 32)
+
+        Text("Your bookings")
+          .displayCaps(24)
+          .padding(.top, 48)
+          .accessibilityAddTraits(.isHeader)
+        list.padding(.top, 24)
 
         if hasPast {
           previousAppointments.padding(.top, 32)
         }
-
-        LoyaltyCardSection()
-          .padding(.top, 64)
 
         ProfileSection()
           .padding(.top, 64)

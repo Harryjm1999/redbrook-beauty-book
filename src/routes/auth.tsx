@@ -14,7 +14,7 @@ type Search = { mode?: "signin" | "signup" };
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (search: Record<string, unknown>): Search => ({
-    mode: search['mode'] === "signup" ? "signup" : "signin",
+    mode: search["mode"] === "signup" ? "signup" : "signin",
   }),
   head: () => ({
     meta: [
@@ -94,7 +94,12 @@ function GoogleButton() {
   }
 
   return (
-    <Button variant="outline" className="label-caps mt-6 w-full" onClick={signInWithGoogle} disabled={busy}>
+    <Button
+      variant="outline"
+      className="label-caps mt-6 w-full"
+      onClick={signInWithGoogle}
+      disabled={busy}
+    >
       Continue with Google
     </Button>
   );
@@ -186,69 +191,125 @@ function SignUpForm() {
 
   if (sent) {
     return (
-      <p className="mt-8 text-sm leading-relaxed text-muted-foreground">
-        We've sent a confirmation link to <strong className="text-foreground">{email}</strong>. Click it to
-        activate your account, then sign in to request an appointment.
-      </p>
+      <div className="mt-8 space-y-6">
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          We've sent a confirmation link to <strong className="text-foreground">{email}</strong>.
+          Click it to activate your account, then sign in to request an appointment.
+        </p>
+        <ResendVerification initialEmail={email} />
+      </div>
     );
   }
 
   return (
-    <form onSubmit={onSubmit} className="mt-8 space-y-5">
-      <div className="space-y-2">
-        <Label htmlFor="signup-name" className="label-caps">
-          Full name
-        </Label>
-        <Input
-          id="signup-name"
-          required
-          value={fullName}
-          onChange={(e) => setFullName(e.target.value)}
-          autoComplete="name"
-        />
+    <>
+      <form onSubmit={onSubmit} className="mt-8 space-y-5">
+        <div className="space-y-2">
+          <Label htmlFor="signup-name" className="label-caps">
+            Full name
+          </Label>
+          <Input
+            id="signup-name"
+            required
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            autoComplete="name"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="signup-phone" className="label-caps">
+            Contact number
+          </Label>
+          <Input
+            id="signup-phone"
+            type="tel"
+            required
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            autoComplete="tel"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="signup-email" className="label-caps">
+            Email
+          </Label>
+          <Input
+            id="signup-email"
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="signup-password" className="label-caps">
+            Password
+          </Label>
+          <Input
+            id="signup-password"
+            type="password"
+            required
+            minLength={8}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="new-password"
+          />
+        </div>
+        <Button type="submit" className="label-caps w-full" disabled={busy}>
+          {busy ? "Creating account…" : "Create account"}
+        </Button>
+      </form>
+      <div className="mt-8 border-t border-border pt-6">
+        <ResendVerification initialEmail={email} />
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="signup-phone" className="label-caps">
-          Contact number
-        </Label>
-        <Input
-          id="signup-phone"
-          type="tel"
-          required
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          autoComplete="tel"
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="signup-email" className="label-caps">
-          Email
-        </Label>
-        <Input
-          id="signup-email"
-          type="email"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          autoComplete="email"
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="signup-password" className="label-caps">
-          Password
-        </Label>
-        <Input
-          id="signup-password"
-          type="password"
-          required
-          minLength={8}
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          autoComplete="new-password"
-        />
-      </div>
-      <Button type="submit" className="label-caps w-full" disabled={busy}>
-        {busy ? "Creating account…" : "Create account"}
+    </>
+  );
+}
+
+function ResendVerification({ initialEmail }: { initialEmail: string }) {
+  const [email, setEmail] = useState(initialEmail);
+  const [busy, setBusy] = useState(false);
+
+  async function onResend(e: React.FormEvent) {
+    e.preventDefault();
+    if (!email) return;
+    setBusy(true);
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+      options: { emailRedirectTo: window.location.origin },
+    });
+    setBusy(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Verification email sent. Please check your inbox and spam folder.");
+  }
+
+  return (
+    <form onSubmit={onResend} className="space-y-3">
+      <p className="label-caps text-muted-foreground">Didn't get your verification email?</p>
+      <Label htmlFor="resend-email" className="sr-only">
+        Email
+      </Label>
+      <Input
+        id="resend-email"
+        type="email"
+        required
+        placeholder="Your email address"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        autoComplete="email"
+      />
+      <Button
+        type="submit"
+        variant="outline"
+        className="label-caps w-full"
+        disabled={busy || !email}
+      >
+        {busy ? "Sending…" : "Resend verification email"}
       </Button>
     </form>
   );
