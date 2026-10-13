@@ -5,7 +5,7 @@ enum AuthMode: Hashable {
   case signin, signup
 }
 
-/// Mirrors src/routes/auth.tsx (email sign in and sign up).
+/// Mirrors src/routes/auth.tsx (email sign in and sign up, plus Google and Apple).
 struct AuthView: View {
   @State private var mode: AuthMode
 
@@ -38,6 +38,8 @@ struct AuthView: View {
         }
       }
       .padding(.top, 32)
+
+      SocialSignInButtons().padding(.top, 32)
 
       PolicyLinks().padding(.top, 48)
     }
