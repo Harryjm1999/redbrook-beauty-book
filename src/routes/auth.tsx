@@ -70,6 +70,7 @@ function AuthPage() {
           <span className="label-caps text-muted-foreground">or</span>
           <span className="h-px flex-1 bg-border" />
         </div>
+        <AppleButton />
         <GoogleButton />
       </div>
     </section>
@@ -101,6 +102,43 @@ function GoogleButton() {
       disabled={busy}
     >
       Continue with Google
+    </Button>
+  );
+}
+
+function AppleButton() {
+  const [busy, setBusy] = useState(false);
+
+  async function signInWithApple() {
+    setBusy(true);
+    const result = await lovable.auth.signInWithOAuth("apple", {
+      redirect_uri: window.location.origin,
+    });
+    if (result.error) {
+      setBusy(false);
+      toast.error("Apple sign-in failed. Please try again or use your email address.");
+      return;
+    }
+    if (result.redirected) return;
+    setBusy(false);
+  }
+
+  return (
+    <Button
+      variant="outline"
+      className="label-caps mt-6 w-full border-foreground bg-foreground text-background hover:bg-foreground/90"
+      onClick={signInWithApple}
+      disabled={busy}
+    >
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 24 24"
+        className="mr-2 h-4 w-4 fill-current"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
+      </svg>
+      {busy ? "Signing in…" : "Sign in with Apple"}
     </Button>
   );
 }
