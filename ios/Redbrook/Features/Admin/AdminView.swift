@@ -6,7 +6,7 @@ struct AdminView: View {
   @Environment(AppRouter.self) private var router
   @Environment(Toaster.self) private var toaster
 
-  enum Section: Hashable { case calendar, pending, upcoming, loyalty }
+  enum Section: Hashable { case calendar, pending, upcoming, loyalty, users }
 
   @State private var section: Section
 
@@ -77,6 +77,7 @@ struct AdminView: View {
             (.pending, "Requests (\(pending.count))"),
             (.upcoming, "Upcoming (\(upcoming.count))"),
             (.loyalty, "Loyalty"),
+            (.users, "Users"),
           ]
         )
         .padding(.top, 32)
@@ -91,6 +92,8 @@ struct AdminView: View {
             upcomingList
           case .loyalty:
             LoyaltyAdminView()
+          case .users:
+            UsersAdminView()
           }
         }
         .padding(.top, 24)
@@ -213,39 +216,48 @@ struct PatientContact: View {
   }
 }
 
-/// The diary's section switcher: two rows of two, so every section, Loyalty included,
-/// is visible on any iPhone without scrolling.
+/// The diary's section switcher: rows of two (an odd last tab takes the whole
+/// row), so every section is visible on any iPhone without scrolling.
 private struct DiaryTabs: View {
   @Binding var selection: AdminView.Section
   let tabs: [(AdminView.Section, String)]
 
-  private let columns = [GridItem(.flexible(), spacing: 3), GridItem(.flexible(), spacing: 3)]
+  private var rows: [[(AdminView.Section, String)]] {
+    stride(from: 0, to: tabs.count, by: 2).map { Array(tabs[$0..<min($0 + 2, tabs.count)]) }
+  }
 
   var body: some View {
-    LazyVGrid(columns: columns, spacing: 3) {
-      ForEach(tabs, id: \.0) { item in
-        let (tab, title) = item
-        let isSelected = selection == tab
-        Button {
-          selection = tab
-        } label: {
-          Text(title)
-            .labelCaps(11.5)
-            .lineLimit(1)
-            .minimumScaleFactor(0.8)
-            .foregroundStyle(isSelected ? Palette.foreground : Palette.mutedForeground)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 10)
-            .background(isSelected ? Palette.card : Color.clear)
-            .clipShape(RoundedRectangle(cornerRadius: 2))
-            .contentShape(Rectangle())
+    VStack(spacing: 3) {
+      ForEach(rows.indices, id: \.self) { row in
+        HStack(spacing: 3) {
+          ForEach(rows[row], id: \.0) { item in
+            tabButton(item.0, item.1)
+          }
         }
-        .buttonStyle(.plain)
-        .accessibilityAddTraits(isSelected ? .isSelected : [])
       }
     }
     .padding(3)
     .background(Palette.muted)
     .clipShape(RoundedRectangle(cornerRadius: 3))
+  }
+
+  private func tabButton(_ tab: AdminView.Section, _ title: String) -> some View {
+    let isSelected = selection == tab
+    return Button {
+      selection = tab
+    } label: {
+      Text(title)
+        .labelCaps(11.5)
+        .lineLimit(1)
+        .minimumScaleFactor(0.8)
+        .foregroundStyle(isSelected ? Palette.foreground : Palette.mutedForeground)
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 10)
+        .background(isSelected ? Palette.card : Color.clear)
+        .clipShape(RoundedRectangle(cornerRadius: 2))
+        .contentShape(Rectangle())
+    }
+    .buttonStyle(.plain)
+    .accessibilityAddTraits(isSelected ? .isSelected : [])
   }
 }

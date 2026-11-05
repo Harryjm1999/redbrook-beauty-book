@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as TreatmentsRouteImport } from './routes/treatments'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAppointmentsRouteImport } from './routes/_authenticated/appointments'
@@ -43,6 +44,11 @@ const ContactRoute = ContactRouteImport.update({
   path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TreatmentsRoute = TreatmentsRouteImport.update({
   id: '/treatments',
   path: '/treatments',
@@ -70,6 +76,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/treatments': typeof TreatmentsRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/appointments': typeof AuthenticatedAppointmentsRoute
@@ -80,6 +87,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/treatments': typeof TreatmentsRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/appointments': typeof AuthenticatedAppointmentsRoute
@@ -92,6 +100,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/treatments': typeof TreatmentsRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/appointments': typeof AuthenticatedAppointmentsRoute
@@ -104,6 +113,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth'
     | '/contact'
+    | '/reset-password'
     | '/treatments'
     | '/admin'
     | '/appointments'
@@ -114,6 +124,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth'
     | '/contact'
+    | '/reset-password'
     | '/treatments'
     | '/admin'
     | '/appointments'
@@ -125,6 +136,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth'
     | '/contact'
+    | '/reset-password'
     | '/treatments'
     | '/_authenticated/admin'
     | '/_authenticated/appointments'
@@ -137,6 +149,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AuthRoute: typeof AuthRoute
   ContactRoute: typeof ContactRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   TreatmentsRoute: typeof TreatmentsRoute
 }
 
@@ -175,6 +188,13 @@ declare module '@tanstack/react-router' {
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/treatments': {
@@ -229,6 +249,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AuthRoute: AuthRoute,
   ContactRoute: ContactRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   TreatmentsRoute: TreatmentsRoute,
 }
 export const routeTree = rootRouteImport

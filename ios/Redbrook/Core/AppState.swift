@@ -37,9 +37,31 @@ final class SessionStore {
     isCheckingStaff = false
   }
 
+  /// True after a reset-password link signs someone in, until they choose a
+  /// new password.
+  var needsNewPassword = false
+
   func signOut() async {
     try? await supabase.auth.signOut()
   }
+
+  /// Handles redbrook://auth-callback links from the confirm-email and
+  /// reset-password emails: signs the person in and reports which it was.
+  func handleAuthLink(_ url: URL) async throws -> AuthLink? {
+    guard url.scheme == "redbrook", url.host == "auth-callback" else { return nil }
+    let items = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems ?? []
+    let isReset = items.contains { $0.name == "next" && $0.value == "reset" }
+    _ = try await supabase.auth.session(from: url)
+    if isReset {
+      needsNewPassword = true
+      return .passwordReset
+    }
+    return .emailConfirmed
+  }
+}
+
+enum AuthLink {
+  case emailConfirmed, passwordReset
 }
 
 enum AppTab: String, Hashable {
