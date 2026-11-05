@@ -11,6 +11,13 @@ enum SupabaseConfig {
   /// The published Lovable website, which hosts the sign-in return page and the
   /// password reset page.
   static let website = URL(string: "https://redbrook-beauty-book.lovable.app")!
+
+  /// Where the confirm-email link sends people who signed up in the app. The
+  /// page (public/app-auth-callback.html) opens the app at redbrook://auth-callback,
+  /// which signs them in.
+  static let emailConfirmedRedirect = URL(string: "\(website.absoluteString)/app-auth-callback.html")!
+  /// Same page for the reset-password email; the app then asks for a new password.
+  static let passwordResetRedirect = URL(string: "\(website.absoluteString)/app-auth-callback.html?next=reset")!
 }
 
 let supabase = SupabaseClient(

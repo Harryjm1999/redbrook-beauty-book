@@ -44,6 +44,12 @@ targets:
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         ITSAppUsesNonExemptEncryption: false
+        # redbrook:// links from the confirm-email and reset-password emails
+        # (via public/app-auth-callback.html) open the app.
+        CFBundleURLTypes:
+          - CFBundleURLName: uk.co.redbrookclinic.app
+            CFBundleURLSchemes:
+              - redbrook
         UILaunchScreen:
           UIColorName: LaunchBackground
         UIUserInterfaceStyle: Light

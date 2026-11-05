@@ -36,9 +36,12 @@ struct RedbrookApp: App {
 
 struct RootView: View {
   @Environment(AppRouter.self) private var router
+  @Environment(SessionStore.self) private var session
+  @Environment(Toaster.self) private var toaster
 
   var body: some View {
     @Bindable var router = router
+    @Bindable var session = session
 
     TabView(selection: $router.tab) {
       NavigationStack { HomeView().policyDestinations() }
@@ -62,6 +65,24 @@ struct RootView: View {
         .tag(AppTab.more)
     }
     .overlay { ToastOverlay() }
+    .onOpenURL { url in
+      Task {
+        do {
+          switch try await session.handleAuthLink(url) {
+          case .emailConfirmed:
+            router.tab = .appointments
+            toaster.success("Your email is confirmed and you're signed in.")
+          case .passwordReset, nil:
+            break
+          }
+        } catch {
+          toaster.error("That link has expired or was already used. Please sign in, or ask for a new link.")
+        }
+      }
+    }
+    .sheet(isPresented: $session.needsNewPassword) {
+      NewPasswordSheet()
+    }
   }
 }
 
