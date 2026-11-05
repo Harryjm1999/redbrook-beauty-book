@@ -22,6 +22,13 @@
       "when": 1791809945506,
       "tag": "0002_patients_delete_own_past_bookings",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793880514872,
+      "tag": "0003_admin_delete_user_function",
+      "breakpoints": true
     }
   ]
 }

@@ -250,6 +250,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_delete_user: { Args: { _user_id: string }; Returns: undefined }
       busy_ranges: {
         Args: { _day: string }
         Returns: {
