@@ -15,7 +15,7 @@ struct SocialSignInButtons: View {
     case google, apple
   }
 
-  private static let website = URL(string: "https://redbrook-beauty-book.lovable.app")!
+  private static let website = SupabaseConfig.website
   private static let callbackScheme = "redbrook"
 
   var body: some View {

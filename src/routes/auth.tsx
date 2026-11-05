@@ -191,7 +191,79 @@ function SignInForm() {
       <Button type="submit" className="label-caps w-full" disabled={busy}>
         {busy ? "Signing in…" : "Sign in"}
       </Button>
+      <ForgotPassword initialEmail={email} />
     </form>
+  );
+}
+
+function ForgotPassword({ initialEmail }: { initialEmail: string }) {
+  const [open, setOpen] = useState(false);
+  const [email, setEmail] = useState(initialEmail);
+  const [busy, setBusy] = useState(false);
+  const [sent, setSent] = useState(false);
+
+  async function sendLink() {
+    if (!email) return;
+    setBusy(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setBusy(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setSent(true);
+  }
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        className="block w-full text-center text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
+        onClick={() => {
+          setEmail(initialEmail);
+          setOpen(true);
+        }}
+      >
+        Forgot your password?
+      </button>
+    );
+  }
+
+  if (sent) {
+    return (
+      <p className="text-sm leading-relaxed text-muted-foreground">
+        If there's an account for <strong className="text-foreground">{email}</strong>, we've sent
+        it a link to choose a new password. Please check your inbox and spam folder.
+      </p>
+    );
+  }
+
+  return (
+    <div className="space-y-3 border-t border-border pt-5">
+      <p className="label-caps text-muted-foreground">Reset your password</p>
+      <Label htmlFor="forgot-email" className="sr-only">
+        Email
+      </Label>
+      <Input
+        id="forgot-email"
+        type="email"
+        placeholder="Your email address"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        autoComplete="email"
+      />
+      <Button
+        type="button"
+        variant="outline"
+        className="label-caps w-full"
+        disabled={busy || !email}
+        onClick={sendLink}
+      >
+        {busy ? "Sending…" : "Email me a reset link"}
+      </Button>
+    </div>
   );
 }
 

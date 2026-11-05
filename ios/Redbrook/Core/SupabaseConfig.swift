@@ -8,6 +8,9 @@ import Supabase
 enum SupabaseConfig {
   static let url = URL(string: "https://rcjdyvgthlwqinmaejoa.supabase.co")!
   static let publishableKey = "sb_publishable_zlUh4gUs_RLVniJ-ebG9-Q_E-Js5P1E"
+  /// The published Lovable website, which hosts the sign-in return page and the
+  /// password reset page.
+  static let website = URL(string: "https://redbrook-beauty-book.lovable.app")!
 }
 
 let supabase = SupabaseClient(
