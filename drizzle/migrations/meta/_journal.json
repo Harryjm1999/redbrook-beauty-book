@@ -29,6 +29,13 @@
       "when": 1793880514872,
       "tag": "0003_admin_delete_user_function",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793882369212,
+      "tag": "0004_add_third_clinic_admin_signup",
+      "breakpoints": true
     }
   ]
 }
