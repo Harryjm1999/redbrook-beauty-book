@@ -211,6 +211,24 @@ enum API {
     return try await query.order("created_at", ascending: false).execute().value
   }
 
+  /// Every account's name and contact details for the staff Users tab.
+  /// Passwords are never stored in a readable form, so there is nothing to show.
+  static func allUsers() async throws -> [Profile] {
+    try await supabase
+      .from("profiles")
+      .select("id, full_name, email, phone")
+      .order("full_name", ascending: true)
+      .execute()
+      .value
+  }
+
+  /// Permanently deletes another person's account (admins only, enforced by the
+  /// `admin_delete_user` database function). Their profile, bookings and loyalty
+  /// history go with it, and they can sign up again with the same email.
+  static func deleteUser(id: UUID) async throws {
+    try await supabase.rpc("admin_delete_user", params: ["_user_id": id.db]).execute()
+  }
+
   static func allClients() async throws -> [Profile] {
     try await supabase
       .from("profiles")
