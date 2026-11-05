@@ -117,7 +117,12 @@ final class Toaster {
 
   func success(_ message: String) { show(Toast(message: message, isError: false)) }
   func error(_ message: String) { show(Toast(message: message, isError: true)) }
-  func error(_ error: Error) { show(Toast(message: describe(error), isError: true)) }
+  func error(_ error: Error) {
+    // A screen that reloads (for example as sign in finishes) cancels the
+    // request it had running. That isn't a real problem, so stay quiet.
+    if isCancellation(error) { return }
+    show(Toast(message: describe(error), isError: true))
+  }
 
   func dismiss() { current = nil }
 
@@ -128,4 +133,13 @@ final class Toaster {
       if current?.id == toast.id { current = nil }
     }
   }
+}
+
+/// True for errors that only mean a request was cancelled.
+func isCancellation(_ error: Error) -> Bool {
+  if error is CancellationError { return true }
+  if let urlError = error as? URLError, urlError.code == .cancelled { return true }
+  let nsError = error as NSError
+  if nsError.domain == NSURLErrorDomain, nsError.code == NSURLErrorCancelled { return true }
+  return String(describing: error).contains("CancellationError")
 }
